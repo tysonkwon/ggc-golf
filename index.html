@@ -450,6 +450,16 @@ function sortRounds() {
     rounds.sort((a, b) => parseDateOrder(a.date) - parseDateOrder(b.date));
 }
 
+function getDefaultRoundId() {
+    if (rounds.length === 0) return null;
+    const now = new Date();
+    const todayOrder = (now.getMonth() + 1) * 100 + now.getDate();
+    // 오늘 이후 라운드 중 가장 가까운 것
+    const upcoming = rounds.find(r => parseDateOrder(r.date) >= todayOrder);
+    // 없으면 마지막 라운드 (모두 지난 경우)
+    return upcoming ? upcoming.id : rounds[rounds.length - 1].id;
+}
+
 // --- Init ---
 async function init() {
     showLoading(true);
@@ -494,7 +504,7 @@ async function init() {
             scores[s.round_id][s.member_name] = s.score;
         });
 
-        activeId = rounds.length > 0 ? rounds[0].id : null;
+        activeId = getDefaultRoundId();
         render();
     } catch(e) {
         showToast('데이터 로드 실패: ' + e.message);

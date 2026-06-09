@@ -113,7 +113,7 @@
         .btn-primary:disabled { background: #c8d5cc; color: #8fa898; cursor: not-allowed; }
         .btn-secondary { background: #f4f7f5; color: #2d6a4f; margin-top: 10px; font-size: 14px; }
         .btn-secondary:hover { background: #e8f0eb; }
-        .btn-danger { background: #fff0f0; color: #c0392b; margin-top: 8px; font-size: 13px; padding: 10px; display: none; }
+        .btn-danger { background: #fff0f0; color: #c0392b; margin-top: 8px; font-size: 13px; padding: 10px; }
         .btn-danger:hover { background: #ffe0e0; }
 
         /* Result */
@@ -134,6 +134,24 @@
         .absentees-label { font-size: 11px; color: #9aab9d; font-weight: 600; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px; }
         .absentee-tags { display: flex; flex-wrap: wrap; gap: 6px; }
         .absentee-tag { background: #e2e8e4; color: #6b7e72; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+
+        /* Score input */
+        .score-section { margin-top: 14px; border-top: 1px solid #e9f5ee; padding-top: 14px; }
+        .score-section-title { font-size: 13px; font-weight: 700; color: #1b4332; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .score-group { margin-bottom: 12px; }
+        .score-group-label { font-size: 12px; font-weight: 700; margin-bottom: 7px; }
+        .group-a .score-group-label { color: #b45309; }
+        .group-b .score-group-label { color: #0369a1; }
+        .group-c .score-group-label { color: #9d174d; }
+        .score-rows { display: flex; flex-direction: column; gap: 6px; }
+        .score-row { display: flex; align-items: center; gap: 8px; }
+        .score-row .s-name { flex: 1; font-size: 13px; font-weight: 600; color: #2d3748; }
+        .score-input { width: 72px; padding: 7px 10px; border: 2px solid #e2e8e4; border-radius: 8px; font-size: 14px; font-weight: 700; text-align: center; outline: none; transition: border-color 0.15s; }
+        .score-input:focus { border-color: #2d6a4f; }
+        .score-input.has-value { border-color: #52b788; background: #f0faf4; }
+        .btn-save-scores { background: linear-gradient(135deg, #1b4332, #2d6a4f); color: white; border: none; border-radius: 10px; padding: 11px 20px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; transition: all 0.18s; }
+        .btn-save-scores:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27,67,50,0.35); }
+        .score-saved-badge { display: inline-flex; align-items: center; gap: 4px; background: #d8f3dc; color: #1b4332; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
 
         /* Modal */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
@@ -179,6 +197,32 @@
         .summary-box .s-val { font-size: 22px; font-weight: 800; color: #1b4332; line-height: 1; }
         .summary-box .s-label { font-size: 11px; color: #6b7e72; margin-top: 4px; }
 
+        /* Score stats */
+        .stats-sub-title { font-size: 14px; font-weight: 700; color: #1b4332; margin: 20px 0 10px; padding-top: 16px; border-top: 1px solid #e9f5ee; }
+        .score-stats-table { width: 100%; border-collapse: collapse; }
+        .score-stats-table th { font-size: 12px; font-weight: 700; color: #9aab9d; text-align: center; padding: 6px 4px 10px; }
+        .score-stats-table th:first-child { text-align: left; }
+        .score-stats-table td { padding: 10px 4px; border-top: 1px solid #f0f4f1; font-size: 14px; text-align: center; vertical-align: middle; }
+        .score-stats-table td:first-child { font-weight: 700; color: #1b4332; text-align: left; }
+        .score-stats-table tr:hover td { background: #f8fbf9; }
+        .score-val { font-weight: 800; color: #1b4332; }
+        .score-best { color: #0369a1; font-weight: 800; }
+        .score-worst { color: #c0392b; font-weight: 600; font-size: 12px; }
+        .no-score { color: #c8d5cc; font-size: 12px; }
+
+        /* Round score history */
+        .round-score-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .round-score-item { background: #f7f9f8; border-radius: 10px; padding: 10px 13px; }
+        .round-score-item .rsi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .round-score-item .rsi-date { font-size: 13px; font-weight: 700; color: #1b4332; }
+        .round-score-item .rsi-venue { font-size: 11px; color: #6b7e72; }
+        .round-score-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        .rsc { display: inline-flex; align-items: center; gap: 4px; background: white; border: 1px solid #e2e8e4; border-radius: 8px; padding: 3px 8px; font-size: 12px; }
+        .rsc .rsc-name { color: #4b5563; }
+        .rsc .rsc-score { font-weight: 800; color: #1b4332; }
+        .rsc.best-score { border-color: #0ea5e9; background: #e0f2fe; }
+        .rsc.best-score .rsc-score { color: #0369a1; }
+
         /* Toast */
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1b4332; color: white; padding: 11px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 300; white-space: nowrap; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -199,7 +243,7 @@
     <!-- Page nav -->
     <div class="nav-tabs">
         <button class="nav-tab active" id="navRound" onclick="switchPage('round')">🏌️ 조편성</button>
-        <button class="nav-tab" id="navStats" onclick="switchPage('stats')">📊 참석 통계</button>
+        <button class="nav-tab" id="navStats" onclick="switchPage('stats')">📊 통계</button>
     </div>
 
     <!-- Round page -->
@@ -244,7 +288,18 @@
             <div class="absentee-tags" id="absenteeTags"></div>
         </div>
         <button class="btn btn-secondary" onclick="assignGroups()">🔀 다시 섞기</button>
-        <button class="btn btn-danger" id="deleteBtn" onclick="deleteCurrentRound()">🗑️ 이 라운드 삭제</button>
+
+        <!-- Score input section -->
+        <div class="score-section" id="scoreSection">
+            <div class="score-section-title">
+                🏅 라운드 결과 입력
+                <span id="scoreSavedBadge" class="score-saved-badge" style="display:none">✓ 저장됨</span>
+            </div>
+            <div id="scoreInputGroups"></div>
+            <button class="btn-save-scores" onclick="saveScores()">💾 결과 저장</button>
+        </div>
+
+        <button class="btn btn-danger" onclick="deleteCurrentRound()">🗑️ 이 라운드 삭제</button>
     </div>
 
     <div class="reset-link"><a onclick="resetCurrentRound()">선택 초기화</a></div>
@@ -267,6 +322,23 @@
                 </thead>
                 <tbody id="statsBody"></tbody>
             </table>
+
+            <div class="stats-sub-title">🏅 타수 기록</div>
+            <table class="score-stats-table" id="scoreStatsTable">
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>평균</th>
+                        <th>최저</th>
+                        <th>최고</th>
+                        <th>횟수</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreStatsBody"></tbody>
+            </table>
+
+            <div class="stats-sub-title">📋 라운드별 결과</div>
+            <div id="roundScoreList" class="round-score-list"></div>
         </div>
     </div>
 </div>
@@ -322,21 +394,41 @@ const MAX = 12;
 
 let rounds = [];       // [{id, date, venue, is_custom}]
 let attendance = {};   // {round_id: Set<member_name>}
-let guests = {};       // {round_id: Set<name>}  — 이번 라운드 게스트
+let guests = {};       // {round_id: Set<name>}
 let groupResults = {}; // {round_id: [[m1,m2,m3,m4],[...],[...]]}
+let scores = {};       // {round_id: {member_name: score}}
 let activeId = null;
+
+// 날짜 문자열 "6/19(금)" → 정렬용 숫자 (월*100+일)
+function parseDateOrder(dateStr) {
+    const m = dateStr.match(/(\d+)\/(\d+)/);
+    if (!m) return 9999;
+    return parseInt(m[1]) * 100 + parseInt(m[2]);
+}
+
+function sortRounds() {
+    rounds.sort((a, b) => parseDateOrder(a.date) - parseDateOrder(b.date));
+}
 
 // --- Init ---
 async function init() {
     showLoading(true);
     try {
-        const [rRes, aRes, gRes] = await Promise.all([
+        const [rRes, aRes, gRes, sRes] = await Promise.all([
             sb.from('rounds').select('*').order('created_at'),
             sb.from('attendance').select('*'),
             sb.from('group_results').select('*').order('group_index').order('id'),
+            sb.from('scores').select('*'),
         ]);
 
+        if (rRes.error) throw rRes.error;
+        if (aRes.error) throw aRes.error;
+        if (gRes.error) throw gRes.error;
+        if (sRes.error) throw new Error('scores 테이블 오류: ' + sRes.error.message);
+
         rounds = rRes.data || [];
+        sortRounds();
+
         attendance = {};
         guests = {};
         rounds.forEach(r => { attendance[r.id] = new Set(); guests[r.id] = new Set(); });
@@ -348,14 +440,18 @@ async function init() {
         });
 
         groupResults = {};
-        const gRows = gRes.data || [];
-        gRows.forEach(g => {
+        (gRes.data || []).forEach(g => {
             if (!groupResults[g.round_id]) groupResults[g.round_id] = [[], [], []];
             const grp = groupResults[g.round_id][g.group_index];
-            // 중복 방지: 그룹당 최대 4명, 동일 이름 중복 제외
             if (grp && grp.length < 4 && !grp.includes(g.member_name)) {
                 grp.push(g.member_name);
             }
+        });
+
+        scores = {};
+        (sRes.data || []).forEach(s => {
+            if (!scores[s.round_id]) scores[s.round_id] = {};
+            scores[s.round_id][s.member_name] = s.score;
         });
 
         activeId = rounds.length > 0 ? rounds[0].id : null;
@@ -428,11 +524,10 @@ function render() {
     if (groups && groups[0] && groups[0].length > 0) {
         resultCard.style.display = 'block';
         renderGroupResult(groups, sel);
+        renderScoreInputs(round.id, groups);
     } else {
         resultCard.style.display = 'none';
     }
-
-    document.getElementById('deleteBtn').style.display = round.is_custom ? 'block' : 'none';
 }
 
 function renderTabs() {
@@ -559,7 +654,6 @@ async function assignGroups() {
     render();
     document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Save to DB: delete first, then insert to avoid duplicates
     const { error: delErr } = await sb.from('group_results').delete().eq('round_id', round.id);
     if (!delErr) {
         const rows = [];
@@ -587,6 +681,73 @@ function renderGroupResult(groups, sel) {
     const absentees = MEMBERS.filter(m => !sel.has(m));
     document.getElementById('absenteeTags').innerHTML =
         absentees.map(n => `<span class="absentee-tag">${n}</span>`).join('');
+}
+
+// --- Score input ---
+function renderScoreInputs(roundId, groups) {
+    const configs = [
+        { cls: 'group-a', label: '🟠 A조' },
+        { cls: 'group-b', label: '🔵 B조' },
+        { cls: 'group-c', label: '🩷 C조' }
+    ];
+    const roundScores = scores[roundId] || {};
+    const hasSaved = Object.keys(roundScores).length > 0;
+
+    document.getElementById('scoreSavedBadge').style.display = hasSaved ? 'inline-flex' : 'none';
+
+    document.getElementById('scoreInputGroups').innerHTML = groups.map((g, i) => `
+        <div class="score-group ${configs[i].cls}" style="padding:10px;border-radius:10px;margin-bottom:8px;">
+            <div class="score-group-label">${configs[i].label}</div>
+            <div class="score-rows">
+                ${g.map(name => {
+                    const val = roundScores[name] !== undefined ? roundScores[name] : '';
+                    return `
+                        <div class="score-row">
+                            <span class="s-name">${name}</span>
+                            <input class="score-input${val !== '' ? ' has-value' : ''}"
+                                   type="number" min="50" max="150"
+                                   placeholder="타수"
+                                   value="${val}"
+                                   data-name="${name}"
+                                   oninput="this.classList.toggle('has-value', this.value !== '')">
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function saveScores() {
+    const round = activeRound();
+    const inputs = document.querySelectorAll('#scoreInputGroups .score-input');
+    const newScores = {};
+    inputs.forEach(inp => {
+        const val = inp.value.trim();
+        if (val !== '') {
+            const n = parseInt(val);
+            if (!isNaN(n) && n >= 50 && n <= 200) newScores[inp.dataset.name] = n;
+        }
+    });
+
+    if (Object.keys(newScores).length === 0) {
+        showToast('입력된 타수가 없습니다');
+        return;
+    }
+
+    if (!scores[round.id]) scores[round.id] = {};
+    Object.assign(scores[round.id], newScores);
+
+    const rows = Object.entries(newScores).map(([member_name, score]) => ({
+        round_id: round.id, member_name, score
+    }));
+    const { error } = await sb.from('scores').upsert(rows, { onConflict: 'round_id,member_name' });
+    if (error) {
+        showToast('저장 실패: ' + error.message);
+        return;
+    }
+    showToast('결과 저장됨');
+    document.getElementById('scoreSavedBadge').style.display = 'inline-flex';
 }
 
 // --- Reset ---
@@ -624,28 +785,37 @@ async function addCustomRound() {
     if (error) { alert('저장 실패: ' + error.message); return; }
 
     rounds.push({ id, date, venue, is_custom: true });
+    sortRounds();
     attendance[id] = new Set();
     guests[id] = new Set();
     activeId = id;
     closeModal();
     render();
     setTimeout(() => {
-        const scroll = document.querySelector('.tab-scroll');
-        scroll.scrollLeft = scroll.scrollWidth;
+        const idx = rounds.findIndex(r => r.id === id);
+        const tabs = document.querySelectorAll('.tab-btn:not(.add-tab)');
+        if (tabs[idx]) tabs[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }, 100);
 }
 
 async function deleteCurrentRound() {
     const round = activeRound();
-    if (!round.is_custom) return;
-    if (!confirm(`"${round.date} ${round.venue}" 라운드를 삭제할까요?`)) return;
+    if (!confirm(`"${round.date} ${round.venue}" 라운드를 삭제할까요?\n참석 정보와 조편성 결과도 함께 삭제됩니다.`)) return;
 
-    await sb.from('rounds').delete().eq('id', round.id);
+    await Promise.all([
+        sb.from('rounds').delete().eq('id', round.id),
+        sb.from('attendance').delete().eq('round_id', round.id),
+        sb.from('group_results').delete().eq('round_id', round.id),
+        sb.from('scores').delete().eq('round_id', round.id),
+    ]);
+
     rounds = rounds.filter(r => r.id !== round.id);
     delete attendance[round.id];
     delete groupResults[round.id];
+    delete scores[round.id];
     activeId = rounds[0]?.id || null;
     render();
+    showToast('라운드가 삭제되었습니다');
 }
 
 // --- UI helpers ---
@@ -670,14 +840,12 @@ function switchPage(page) {
 
 // --- Stats ---
 function renderStats() {
-    // 조편성이 완료된 라운드만 집계 (조편성 = 실제 진행된 라운드)
     const completedRounds = rounds.filter(r => {
         const g = groupResults[r.id];
         return g && g[0] && g[0].length > 0;
     });
     const totalRounds = completedRounds.length;
 
-    // 정회원만 통계 (게스트 제외)
     const stats = MEMBERS.map(name => {
         let att = 0;
         completedRounds.forEach(r => {
@@ -686,17 +854,15 @@ function renderStats() {
         return { name, att, abs: totalRounds - att };
     }).sort((a, b) => b.att - a.att || a.name.localeCompare(b.name));
 
-    // Summary
     const totalAtt = stats.reduce((s, m) => s + m.att, 0);
     const avgAtt = totalRounds > 0 ? (totalAtt / MEMBERS.length).toFixed(1) : 0;
-    const perfect = stats.filter(m => m.att === totalRounds).length;
+    const perfect = stats.filter(m => m.att === totalRounds && totalRounds > 0).length;
     document.getElementById('statsSummary').innerHTML = `
         <div class="summary-box"><div class="s-val">${totalRounds}</div><div class="s-label">진행 라운드</div></div>
         <div class="summary-box"><div class="s-val">${avgAtt}</div><div class="s-label">평균 참석 횟수</div></div>
         <div class="summary-box"><div class="s-val">${perfect}</div><div class="s-label">개근 멤버</div></div>
     `;
 
-    // Table
     let rank = 1;
     document.getElementById('statsBody').innerHTML = stats.map((m, i) => {
         if (i > 0 && stats[i-1].att !== m.att) rank = i + 1;
@@ -726,6 +892,78 @@ function renderStats() {
     if (totalRounds === 0) {
         document.getElementById('statsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9aab9d;padding:24px">조편성이 완료된 라운드가 없습니다</td></tr>`;
     }
+
+    renderScoreStats(completedRounds);
+}
+
+function renderScoreStats(completedRounds) {
+    // 개인 타수 통계
+    const memberScoreStats = MEMBERS.map(name => {
+        const memberScores = completedRounds
+            .map(r => scores[r.id] && scores[r.id][name])
+            .filter(s => s !== undefined && s !== null);
+        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0 };
+        const avg = memberScores.reduce((a, b) => a + b, 0) / memberScores.length;
+        return {
+            name,
+            avg: Math.round(avg * 10) / 10,
+            best: Math.min(...memberScores),
+            worst: Math.max(...memberScores),
+            count: memberScores.length
+        };
+    }).filter(m => m.count > 0).sort((a, b) => a.avg - b.avg);
+
+    if (memberScoreStats.length === 0) {
+        document.getElementById('scoreStatsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9aab9d;padding:16px">저장된 타수 기록이 없습니다</td></tr>`;
+    } else {
+        document.getElementById('scoreStatsBody').innerHTML = memberScoreStats.map((m, i) => {
+            const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+            const rankLabel = i < 3 ? i + 1 : '';
+            return `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:7px">
+                            <span class="rank-badge ${rankClass}">${rankLabel}</span>
+                            ${m.name}
+                        </div>
+                    </td>
+                    <td><span class="score-val">${m.avg}</span></td>
+                    <td><span class="score-best">${m.best}</span></td>
+                    <td><span class="score-worst">${m.worst}</span></td>
+                    <td><span style="color:#6b7e72;font-size:12px">${m.count}회</span></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // 라운드별 결과
+    const roundsWithScores = completedRounds.filter(r => scores[r.id] && Object.keys(scores[r.id]).length > 0);
+    if (roundsWithScores.length === 0) {
+        document.getElementById('roundScoreList').innerHTML = `<div style="text-align:center;color:#9aab9d;padding:16px;font-size:13px">저장된 라운드 결과가 없습니다</div>`;
+        return;
+    }
+
+    document.getElementById('roundScoreList').innerHTML = roundsWithScores.map(r => {
+        const roundScores = scores[r.id];
+        const entries = Object.entries(roundScores).sort((a, b) => a[1] - b[1]);
+        const bestScore = entries[0][1];
+        return `
+            <div class="round-score-item">
+                <div class="rsi-header">
+                    <span class="rsi-date">${r.date}</span>
+                    <span class="rsi-venue">${r.venue}</span>
+                </div>
+                <div class="round-score-chips">
+                    ${entries.map(([name, score]) => `
+                        <span class="rsc${score === bestScore ? ' best-score' : ''}">
+                            <span class="rsc-name">${name}</span>
+                            <span class="rsc-score">${score}</span>
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });

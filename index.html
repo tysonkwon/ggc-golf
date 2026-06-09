@@ -151,6 +151,34 @@
         .reset-link a { color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; text-decoration: underline; }
         .reset-link a:hover { color: rgba(255,255,255,0.75); }
 
+        /* Nav tabs */
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 18px; background: rgba(0,0,0,0.15); border-radius: 14px; padding: 4px; }
+        .nav-tab { flex: 1; padding: 9px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; background: transparent; color: rgba(255,255,255,0.6); transition: all 0.18s; }
+        .nav-tab.active { background: white; color: #1b4332; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .nav-tab:hover:not(.active) { color: white; }
+
+        /* Stats */
+        .stats-table { width: 100%; border-collapse: collapse; }
+        .stats-table th { font-size: 12px; font-weight: 700; color: #9aab9d; text-align: center; padding: 6px 4px 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .stats-table th:first-child { text-align: left; }
+        .stats-table td { padding: 10px 4px; border-top: 1px solid #f0f4f1; font-size: 14px; text-align: center; vertical-align: middle; }
+        .stats-table td:first-child { font-weight: 700; color: #1b4332; text-align: left; }
+        .stats-table tr:hover td { background: #f8fbf9; }
+        .rank-badge { display: inline-block; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 800; line-height: 22px; text-align: center; }
+        .rank-1 { background: #fef3c7; color: #b45309; }
+        .rank-2 { background: #e5e7eb; color: #4b5563; }
+        .rank-3 { background: #fde8c8; color: #92400e; }
+        .rank-n { background: #f3f4f6; color: #9ca3af; font-size: 10px; }
+        .att-bar-wrap { background: #e9f5ee; border-radius: 20px; height: 8px; width: 80px; margin: 0 auto; }
+        .att-bar { height: 8px; border-radius: 20px; background: linear-gradient(90deg, #52b788, #1b4332); transition: width 0.4s; }
+        .att-count { font-weight: 800; color: #1b4332; }
+        .abs-count { color: #ef4444; font-weight: 600; }
+        .rate-text { font-size: 12px; color: #6b7e72; }
+        .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+        .summary-box { background: #f0faf4; border-radius: 12px; padding: 12px; text-align: center; }
+        .summary-box .s-val { font-size: 22px; font-weight: 800; color: #1b4332; line-height: 1; }
+        .summary-box .s-label { font-size: 11px; color: #6b7e72; margin-top: 4px; }
+
         /* Toast */
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1b4332; color: white; padding: 11px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 300; white-space: nowrap; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -168,6 +196,14 @@
         <div class="sub">16인 정기 라운드 · 매월 12명 참석</div>
     </div>
 
+    <!-- Page nav -->
+    <div class="nav-tabs">
+        <button class="nav-tab active" id="navRound" onclick="switchPage('round')">🏌️ 조편성</button>
+        <button class="nav-tab" id="navStats" onclick="switchPage('stats')">📊 참석 통계</button>
+    </div>
+
+    <!-- Round page -->
+    <div id="pageRound">
     <div class="tab-scroll">
         <div class="tab-row" id="tabRow"></div>
     </div>
@@ -212,6 +248,27 @@
     </div>
 
     <div class="reset-link"><a onclick="resetCurrentRound()">선택 초기화</a></div>
+    </div><!-- /pageRound -->
+
+    <!-- Stats page -->
+    <div id="pageStats" style="display:none">
+        <div class="card">
+            <div class="card-title">📊 참석 통계</div>
+            <div class="stats-summary" id="statsSummary"></div>
+            <table class="stats-table" id="statsTable">
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>참석</th>
+                        <th>미참석</th>
+                        <th>참석률</th>
+                        <th>참석 현황</th>
+                    </tr>
+                </thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Add Guest Modal -->
@@ -596,6 +653,75 @@ function showToast(msg) {
     t.classList.add('show');
     clearTimeout(t._t);
     t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// --- Page switch ---
+function switchPage(page) {
+    document.getElementById('pageRound').style.display = page === 'round' ? 'block' : 'none';
+    document.getElementById('pageStats').style.display = page === 'stats' ? 'block' : 'none';
+    document.getElementById('navRound').classList.toggle('active', page === 'round');
+    document.getElementById('navStats').classList.toggle('active', page === 'stats');
+    if (page === 'stats') renderStats();
+}
+
+// --- Stats ---
+function renderStats() {
+    // 조편성이 완료된 라운드만 집계 (조편성 = 실제 진행된 라운드)
+    const completedRounds = rounds.filter(r => {
+        const g = groupResults[r.id];
+        return g && g[0] && g[0].length > 0;
+    });
+    const totalRounds = completedRounds.length;
+
+    // 정회원만 통계 (게스트 제외)
+    const stats = MEMBERS.map(name => {
+        let att = 0;
+        completedRounds.forEach(r => {
+            if ((attendance[r.id] || new Set()).has(name)) att++;
+        });
+        return { name, att, abs: totalRounds - att };
+    }).sort((a, b) => b.att - a.att || a.name.localeCompare(b.name));
+
+    // Summary
+    const totalAtt = stats.reduce((s, m) => s + m.att, 0);
+    const avgAtt = totalRounds > 0 ? (totalAtt / MEMBERS.length).toFixed(1) : 0;
+    const perfect = stats.filter(m => m.att === totalRounds).length;
+    document.getElementById('statsSummary').innerHTML = `
+        <div class="summary-box"><div class="s-val">${totalRounds}</div><div class="s-label">진행 라운드</div></div>
+        <div class="summary-box"><div class="s-val">${avgAtt}</div><div class="s-label">평균 참석 횟수</div></div>
+        <div class="summary-box"><div class="s-val">${perfect}</div><div class="s-label">개근 멤버</div></div>
+    `;
+
+    // Table
+    let rank = 1;
+    document.getElementById('statsBody').innerHTML = stats.map((m, i) => {
+        if (i > 0 && stats[i-1].att !== m.att) rank = i + 1;
+        const rate = totalRounds > 0 ? Math.round(m.att / totalRounds * 100) : 0;
+        let rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
+        let rankLabel = rank <= 3 ? rank : '';
+        return `
+            <tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:7px">
+                        <span class="rank-badge ${rankClass}">${rankLabel}</span>
+                        ${m.name}
+                    </div>
+                </td>
+                <td><span class="att-count">${m.att}</span></td>
+                <td><span class="abs-count">${m.abs}</span></td>
+                <td><span class="rate-text">${rate}%</span></td>
+                <td>
+                    <div class="att-bar-wrap">
+                        <div class="att-bar" style="width:${rate}%"></div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    if (totalRounds === 0) {
+        document.getElementById('statsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9aab9d;padding:24px">조편성이 완료된 라운드가 없습니다</td></tr>`;
+    }
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });

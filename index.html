@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>26년 GGC 월례회</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(160deg, #1b4332 0%, #2d6a4f 60%, #1b4332 100%);
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+        }
+
+        .container { max-width: 600px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .header .sub {
+            margin-top: 6px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.55);
+        }
+
+        /* Tab scroll wrapper */
+        .tab-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            margin-bottom: 16px;
+        }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+
+        .tab-row {
+            display: flex;
+            gap: 6px;
+            padding: 4px 2px 6px;
+            min-width: max-content;
+        }
+
+        .tab-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 9px 14px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.65);
+            cursor: pointer;
+            transition: all 0.18s;
+            min-width: 72px;
+            position: relative;
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+        .tab-btn.active {
+            background: white;
+            color: #1b4332;
+            border-color: white;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+        }
+        .tab-btn .tab-date {
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .tab-btn .tab-venue {
+            font-size: 10px;
+            margin-top: 3px;
+            opacity: 0.7;
+        }
+        .tab-btn.active .tab-venue { opacity: 0.6; }
+        .tab-btn .tab-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #52b788;
+            position: absolute;
+            top: 5px; right: 5px;
+        }
+        .tab-btn.add-tab {
+            font-size: 20px;
+            color: rgba(255,255,255,0.7);
+            min-width: 48px;
+            padding: 9px 12px;
+        }
+        .tab-btn.add-tab:hover { color: white; }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1b4332;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .round-info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #d8f3dc;
+            color: #1b4332;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+        .round-info-badge .venue-tag {
+            background: #1b4332;
+            color: #d8f3dc;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Counter bar */
+        .counter-bar {
+            background: #1b4332;
+            border-radius: 12px;
+            padding: 13px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .counter-bar .label { color: rgba(255,255,255,0.7); font-size: 13px; }
+        .counter-bar .count {
+            font-size: 22px;
+            font-weight: 800;
+            color: #95d5b2;
+        }
+        .counter-bar .count span { color: rgba(255,255,255,0.45); font-size: 13px; font-weight: 400; }
+        .progress-wrap {
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+            height: 5px;
+            margin-top: 8px;
+            width: 200px;
+        }
+        .progress-fill {
+            height: 5px;
+            border-radius: 6px;
+            background: #95d5b2;
+            transition: width 0.3s;
+        }
+
+        /* Member grid */
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 7px;
+        }
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 13px;
+            border: 2px solid #e9f5ee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.13s;
+            user-select: none;
+        }
+        .member-item:hover:not(.disabled) { border-color: #52b788; background: #f0faf4; }
+        .member-item.selected { border-color: #1b4332; background: #d8f3dc; }
+        .member-item.disabled { opacity: 0.35; cursor: not-allowed; }
+        .member-checkbox { width: 17px; height: 17px; accent-color: #1b4332; flex-shrink: 0; }
+        .member-name { font-size: 14px; font-weight: 600; color: #2d3748; }
+        .member-item.selected .member-name { color: #1b4332; }
+
+        .warning {
+            margin-top: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 8px 13px;
+            font-size: 13px;
+            color: #856404;
+            display: none;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(27,67,50,0.4); }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:disabled { background: #c8d5cc; color: #8fa898; cursor: not-allowed; }
+        .btn-secondary { background: #f4f7f5; color: #2d6a4f; margin-top: 10px; font-size: 14px; }
+        .btn-secondary:hover { background: #e8f0eb; }
+        .btn-danger { background: #fff0f0; color: #c0392b; margin-top: 8px; font-size: 13px; padding: 10px; }
+        .btn-danger:hover { background: #ffe0e0; }
+
+        /* Result */
+        .result-section { display: none; }
+        .result-header { font-size: 15px; font-weight: 700; color: #1b4332; margin-bottom: 14px; }
+
+        .group-card { border-radius: 12px; padding: 15px; margin-bottom: 10px; }
+        .group-a { background: linear-gradient(135deg, #fff8e1, #ffecb3); border-left: 4px solid #f59e0b; }
+        .group-b { background: linear-gradient(135deg, #e0f2fe, #bae6fd); border-left: 4px solid #0ea5e9; }
+        .group-c { background: linear-gradient(135deg, #fce7f3, #fbcfe8); border-left: 4px solid #ec4899; }
+        .group-label { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+        .group-a .group-label { color: #b45309; }
+        .group-b .group-label { color: #0369a1; }
+        .group-c .group-label { color: #9d174d; }
+        .group-members-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .group-member-chip {
+            background: rgba(255,255,255,0.85);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .absentees-box { margin-top: 12px; background: #f7f9f8; border-radius: 10px; padding: 11px 14px; }
+        .absentees-label { font-size: 11px; color: #9aab9d; font-weight: 600; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .absentee-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .absentee-tag { background: #e2e8e4; color: #6b7e72; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 18px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+        }
+        .modal h3 { font-size: 17px; font-weight: 700; color: #1b4332; margin-bottom: 18px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #e2e8e4;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus { border-color: #2d6a4f; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+        .modal-actions .btn { margin: 0; }
+
+        .reset-link { text-align: center; margin-top: 8px; }
+        .reset-link a { color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; text-decoration: underline; }
+        .reset-link a:hover { color: rgba(255,255,255,0.75); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>⛳ 26년 GGC 월례회</h1>
+        <div class="sub">16인 정기 라운드 · 매월 12명 참석</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-scroll">
+        <div class="tab-row" id="tabRow"></div>
+    </div>
+
+    <!-- Round info + attendance -->
+    <div class="card">
+        <div class="card-title">
+            <span>📋 참석 신청</span>
+            <div class="round-info-badge" id="roundInfoBadge">
+                <span id="roundDateLabel"></span>
+                <span class="venue-tag" id="roundVenueLabel"></span>
+            </div>
+        </div>
+        <div class="counter-bar">
+            <div>
+                <div class="label">참석 신청 인원</div>
+                <div class="progress-wrap">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            <div class="count" id="countDisplay">0 <span>/ 12명</span></div>
+        </div>
+        <div class="member-grid" id="memberGrid"></div>
+        <div class="warning" id="warningMsg">⚠️ 최대 12명까지만 선택할 수 있습니다.</div>
+    </div>
+
+    <!-- Assign button -->
+    <div style="margin-bottom:12px;">
+        <button class="btn btn-primary" id="assignBtn" onclick="assignGroups()" disabled>
+            🏌️‍♂️ 조편성 하기
+        </button>
+    </div>
+
+    <!-- Result -->
+    <div class="card result-section" id="resultCard">
+        <div class="result-header">🏆 조편성 결과</div>
+        <div id="groupResults"></div>
+        <div class="absentees-box">
+            <div class="absentees-label">이번 달 미참석</div>
+            <div class="absentee-tags" id="absenteeTags"></div>
+        </div>
+        <button class="btn btn-secondary" onclick="assignGroups()">🔀 다시 섞기</button>
+        <button class="btn btn-danger" onclick="deleteCurrentRound()">🗑️ 이 라운드 삭제 (커스텀만 가능)</button>
+    </div>
+
+    <div class="reset-link"><a onclick="resetCurrentRound()">선택 초기화</a></div>
+</div>
+
+<!-- Add Round Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3>➕ 라운드 추가</h3>
+        <div class="form-group">
+            <label>날짜 (예: 11/5(수))</label>
+            <input type="text" id="inputDate" placeholder="11/5(수)">
+        </div>
+        <div class="form-group">
+            <label>골프장</label>
+            <input type="text" id="inputVenue" placeholder="블랙스톤, 뉴서울 등">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">취소</button>
+            <button class="btn btn-primary" style="flex:2" onclick="addCustomRound()">추가</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const MEMBERS = [
+    '곽영주', '권태영', '김대호', '김동영',
+    '김동유', '김성래', '김정국', '김정탁',
+    '신용훈', '양성민', '이준헌', '임재용',
+    '장노륜', '장성집', '조주영', '홍상현'
+];
+
+const MAX = 12;
+
+const DEFAULT_ROUNDS = [
+    { id: 'r1',  date: '6/19(금)',  venue: '블랙스톤', custom: false },
+    { id: 'r2',  date: '7/2(목)',   venue: '뉴서울',   custom: false },
+    { id: 'r3',  date: '7/17(금)',  venue: '블랙스톤', custom: false },
+    { id: 'r4',  date: '8/6(목)',   venue: '뉴서울',   custom: false },
+    { id: 'r5',  date: '9/3(목)',   venue: '뉴서울',   custom: false },
+    { id: 'r6',  date: '9/18(금)',  venue: '블랙스톤', custom: false },
+    { id: 'r7',  date: '10/1(목)',  venue: '뉴서울',   custom: false },
+    { id: 'r8',  date: '10/16(금)', venue: '블랙스톤', custom: false },
+    { id: 'r9',  date: '11/20(금)', venue: '블랙스톤', custom: false },
+];
+
+// --- State (persisted to localStorage) ---
+function loadState() {
+    try {
+        const s = JSON.parse(localStorage.getItem('golfState') || '{}');
+        if (!s.rounds) s.rounds = DEFAULT_ROUNDS.map(r => ({ ...r, selected: [], groups: null }));
+        if (!s.activeId) s.activeId = s.rounds[0].id;
+        // ensure all rounds have arrays
+        s.rounds.forEach(r => {
+            if (!Array.isArray(r.selected)) r.selected = [];
+        });
+        return s;
+    } catch(e) {
+        return {
+            rounds: DEFAULT_ROUNDS.map(r => ({ ...r, selected: [], groups: null })),
+            activeId: DEFAULT_ROUNDS[0].id
+        };
+    }
+}
+
+function saveState() {
+    localStorage.setItem('golfState', JSON.stringify(state));
+}
+
+let state = loadState();
+
+function activeRound() {
+    return state.rounds.find(r => r.id === state.activeId);
+}
+
+// --- Tabs ---
+function renderTabs() {
+    const row = document.getElementById('tabRow');
+    row.innerHTML = state.rounds.map(r => {
+        const isActive = r.id === state.activeId;
+        const hasSel = r.selected && r.selected.length > 0;
+        return `
+            <div class="tab-btn${isActive ? ' active' : ''}" onclick="switchTab('${r.id}')">
+                ${hasSel && !isActive ? '<div class="tab-dot"></div>' : ''}
+                <div class="tab-date">${r.date}</div>
+                <div class="tab-venue">${r.venue}</div>
+            </div>
+        `;
+    }).join('') + `
+        <div class="tab-btn add-tab" onclick="openModal()" title="라운드 추가">＋</div>
+    `;
+}
+
+function switchTab(id) {
+    state.activeId = id;
+    saveState();
+    render();
+    // scroll active tab into view
+    setTimeout(() => {
+        const tabs = document.querySelectorAll('.tab-btn');
+        const idx = state.rounds.findIndex(r => r.id === id);
+        if (tabs[idx]) tabs[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }, 50);
+}
+
+// --- Main render ---
+function render() {
+    renderTabs();
+    const round = activeRound();
+    const sel = new Set(round.selected || []);
+
+    document.getElementById('roundDateLabel').textContent = round.date;
+    document.getElementById('roundVenueLabel').textContent = round.venue;
+
+    // counter
+    const n = sel.size;
+    document.getElementById('countDisplay').innerHTML = `${n} <span>/ ${MAX}명</span>`;
+    document.getElementById('progressFill').style.width = `${(n / MAX) * 100}%`;
+    document.getElementById('assignBtn').disabled = n !== MAX;
+
+    // members
+    document.getElementById('memberGrid').innerHTML = MEMBERS.map(name => {
+        const isSel = sel.has(name);
+        const isDisabled = !isSel && sel.size >= MAX;
+        return `
+            <div class="member-item${isSel ? ' selected' : ''}${isDisabled ? ' disabled' : ''}"
+                 onclick="toggleMember('${name}')">
+                <input class="member-checkbox" type="checkbox"
+                       ${isSel ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}
+                       onclick="event.preventDefault()">
+                <span class="member-name">${name}</span>
+            </div>
+        `;
+    }).join('');
+
+    // result
+    const resultCard = document.getElementById('resultCard');
+    if (round.groups) {
+        resultCard.style.display = 'block';
+        renderGroupResult(round.groups, sel);
+    } else {
+        resultCard.style.display = 'none';
+    }
+
+    // show/hide delete button for custom rounds
+    document.querySelector('.btn-danger').style.display = round.custom ? 'block' : 'none';
+}
+
+// --- Toggle member ---
+function toggleMember(name) {
+    const round = activeRound();
+    const sel = new Set(round.selected || []);
+    if (sel.has(name)) {
+        sel.delete(name);
+    } else {
+        if (sel.size >= MAX) { showWarning(); return; }
+        sel.add(name);
+    }
+    round.selected = [...sel];
+    // clear groups if selection changed
+    round.groups = null;
+    saveState();
+    render();
+}
+
+function showWarning() {
+    const w = document.getElementById('warningMsg');
+    w.style.display = 'block';
+    clearTimeout(w._t);
+    w._t = setTimeout(() => { w.style.display = 'none'; }, 2200);
+}
+
+// --- Assign groups ---
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function assignGroups() {
+    const round = activeRound();
+    const participants = shuffle([...round.selected]);
+    round.groups = [
+        participants.slice(0, 4),
+        participants.slice(4, 8),
+        participants.slice(8, 12)
+    ];
+    saveState();
+    render();
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderGroupResult(groups, sel) {
+    const configs = [
+        { cls: 'group-a', label: '🟠 A조' },
+        { cls: 'group-b', label: '🔵 B조' },
+        { cls: 'group-c', label: '🩷 C조' }
+    ];
+    document.getElementById('groupResults').innerHTML = groups.map((g, i) => `
+        <div class="group-card ${configs[i].cls}">
+            <div class="group-label">${configs[i].label}</div>
+            <div class="group-members-grid">
+                ${g.map(n => `<div class="group-member-chip">${n}</div>`).join('')}
+            </div>
+        </div>
+    `).join('');
+
+    const absentees = MEMBERS.filter(m => !sel.has(m));
+    document.getElementById('absenteeTags').innerHTML =
+        absentees.map(n => `<span class="absentee-tag">${n}</span>`).join('');
+}
+
+// --- Reset ---
+function resetCurrentRound() {
+    const round = activeRound();
+    round.selected = [];
+    round.groups = null;
+    saveState();
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// --- Delete custom round ---
+function deleteCurrentRound() {
+    const round = activeRound();
+    if (!round.custom) return;
+    if (!confirm(`"${round.date} ${round.venue}" 라운드를 삭제할까요?`)) return;
+    state.rounds = state.rounds.filter(r => r.id !== round.id);
+    state.activeId = state.rounds[0]?.id || null;
+    saveState();
+    render();
+}
+
+// --- Modal ---
+function openModal() {
+    document.getElementById('inputDate').value = '';
+    document.getElementById('inputVenue').value = '';
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('inputDate').focus(), 100);
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function addCustomRound() {
+    const date = document.getElementById('inputDate').value.trim();
+    const venue = document.getElementById('inputVenue').value.trim();
+    if (!date || !venue) { alert('날짜와 골프장을 모두 입력해주세요.'); return; }
+    const id = 'custom_' + Date.now();
+    state.rounds.push({ id, date, venue, custom: true, selected: [], groups: null });
+    state.activeId = id;
+    saveState();
+    closeModal();
+    render();
+    // scroll tab to end
+    setTimeout(() => {
+        const scroll = document.querySelector('.tab-scroll');
+        scroll.scrollLeft = scroll.scrollWidth;
+    }, 100);
+}
+
+// Close modal on backdrop click
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// Keyboard shortcut for modal
+document.getElementById('inputVenue').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addCustomRound();
+});
+
+render();
+</script>
+</body>
+</html>

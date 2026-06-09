@@ -91,6 +91,20 @@
 
         .warning { margin-top: 10px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 8px 13px; font-size: 13px; color: #856404; display: none; }
 
+        /* Guest */
+        .guest-section { margin-top: 10px; }
+        .guest-section-label { font-size: 11px; font-weight: 700; color: #9aab9d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+        .member-item.guest { border-color: #fde8c8; background: #fffbf5; }
+        .member-item.guest:hover:not(.disabled) { border-color: #f59e0b; background: #fef3e2; }
+        .member-item.guest.selected { border-color: #f59e0b; background: #fef3e2; }
+        .member-item.guest.selected .member-name { color: #92400e; }
+        .guest-badge { font-size: 10px; background: #f59e0b; color: white; padding: 1px 6px; border-radius: 8px; font-weight: 700; flex-shrink: 0; }
+        .guest-remove { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; background: #fee2e2; color: #ef4444; border: none; cursor: pointer; font-size: 13px; font-weight: 700; line-height: 1; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .guest-remove:hover { background: #fecaca; }
+        .add-guest-btn { margin-top: 8px; width: 100%; padding: 9px; border: 2px dashed #d1e8da; border-radius: 10px; background: transparent; color: #52b788; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .add-guest-btn:hover { border-color: #52b788; background: #f0faf4; }
+        .add-guest-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
         /* Buttons */
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.18s; }
         .btn-primary { background: linear-gradient(135deg, #1b4332, #2d6a4f); color: white; }
@@ -176,6 +190,7 @@
             <div class="count" id="countDisplay">0 <span>/ 12명</span></div>
         </div>
         <div class="member-grid" id="memberGrid"></div>
+        <div class="guest-section" id="guestSection"></div>
         <div class="warning" id="warningMsg">⚠️ 최대 12명까지만 선택할 수 있습니다.</div>
     </div>
 
@@ -197,6 +212,21 @@
     </div>
 
     <div class="reset-link"><a onclick="resetCurrentRound()">선택 초기화</a></div>
+</div>
+
+<!-- Add Guest Modal -->
+<div class="modal-overlay" id="guestModalOverlay">
+    <div class="modal">
+        <h3>👤 게스트 추가</h3>
+        <div class="form-group">
+            <label>이름</label>
+            <input type="text" id="inputGuestName" placeholder="홍길동">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" style="flex:1" onclick="closeGuestModal()">취소</button>
+            <button class="btn btn-primary" style="flex:2" onclick="addGuest()">추가 및 참석 등록</button>
+        </div>
+    </div>
 </div>
 
 <!-- Add Round Modal -->
@@ -235,6 +265,7 @@ const MAX = 12;
 
 let rounds = [];       // [{id, date, venue, is_custom}]
 let attendance = {};   // {round_id: Set<member_name>}
+let guests = {};       // {round_id: Set<name>}  — 이번 라운드 게스트
 let groupResults = {}; // {round_id: [[m1,m2,m3,m4],[...],[...]]}
 let activeId = null;
 
@@ -250,10 +281,13 @@ async function init() {
 
         rounds = rRes.data || [];
         attendance = {};
-        rounds.forEach(r => { attendance[r.id] = new Set(); });
+        guests = {};
+        rounds.forEach(r => { attendance[r.id] = new Set(); guests[r.id] = new Set(); });
         (aRes.data || []).forEach(a => {
             if (!attendance[a.round_id]) attendance[a.round_id] = new Set();
+            if (!guests[a.round_id]) guests[a.round_id] = new Set();
             attendance[a.round_id].add(a.member_name);
+            if (a.is_guest) guests[a.round_id].add(a.member_name);
         });
 
         groupResults = {};
@@ -304,6 +338,32 @@ function render() {
         `;
     }).join('');
 
+    // Guest section
+    const guestSet = guests[round.id] || new Set();
+    const isFull = sel.size >= MAX;
+    const guestItems = [...guestSet].map(name => {
+        const isSel = sel.has(name);
+        const isDisabled = !isSel && isFull;
+        return `
+            <div class="member-item guest${isSel ? ' selected' : ''}${isDisabled ? ' disabled' : ''}"
+                 onclick="toggleMember('${name}')">
+                <input class="member-checkbox" type="checkbox"
+                       ${isSel ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}
+                       onclick="event.preventDefault()">
+                <span class="member-name">${name}</span>
+                <span class="guest-badge">게스트</span>
+                <button class="guest-remove" onclick="event.stopPropagation(); removeGuest('${name}')" title="게스트 삭제">×</button>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('guestSection').innerHTML = `
+        ${guestSet.size > 0 ? `<div class="guest-section-label">게스트</div><div class="member-grid">${guestItems}</div>` : ''}
+        <button class="add-guest-btn" ${isFull ? 'disabled' : ''} onclick="openGuestModal()">
+            + 게스트 추가
+        </button>
+    `;
+
     const groups = groupResults[round.id];
     const resultCard = document.getElementById('resultCard');
     if (groups && groups[0] && groups[0].length > 0) {
@@ -350,10 +410,12 @@ function switchTab(id) {
 async function toggleMember(name) {
     const round = activeRound();
     const sel = attendance[round.id] || new Set();
+    const isGuest = (guests[round.id] || new Set()).has(name);
 
     if (sel.has(name)) {
         sel.delete(name);
         attendance[round.id] = sel;
+        groupResults[round.id] = null;
         render();
         await sb.from('attendance').delete()
             .eq('round_id', round.id).eq('member_name', name);
@@ -361,12 +423,51 @@ async function toggleMember(name) {
         if (sel.size >= MAX) { showWarning(); return; }
         sel.add(name);
         attendance[round.id] = sel;
-        // clear group results when attendance changes
         groupResults[round.id] = null;
         render();
-        await sb.from('attendance').upsert({ round_id: round.id, member_name: name });
+        await sb.from('attendance').upsert({ round_id: round.id, member_name: name, is_guest: isGuest });
     }
     renderTabs();
+}
+
+// --- Guest ---
+function openGuestModal() {
+    document.getElementById('inputGuestName').value = '';
+    document.getElementById('guestModalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('inputGuestName').focus(), 100);
+}
+function closeGuestModal() { document.getElementById('guestModalOverlay').classList.remove('open'); }
+
+async function addGuest() {
+    const name = document.getElementById('inputGuestName').value.trim();
+    if (!name) { alert('이름을 입력해주세요.'); return; }
+    const round = activeRound();
+    const sel = attendance[round.id] || new Set();
+    if (sel.size >= MAX) { showWarning(); closeGuestModal(); return; }
+
+    if (!guests[round.id]) guests[round.id] = new Set();
+    guests[round.id].add(name);
+    sel.add(name);
+    attendance[round.id] = sel;
+    groupResults[round.id] = null;
+    closeGuestModal();
+    render();
+    renderTabs();
+
+    await sb.from('attendance').upsert({ round_id: round.id, member_name: name, is_guest: true });
+    showToast(`${name} 게스트 추가`);
+}
+
+async function removeGuest(name) {
+    if (!confirm(`게스트 "${name}"을(를) 삭제할까요?`)) return;
+    const round = activeRound();
+    guests[round.id].delete(name);
+    attendance[round.id].delete(name);
+    groupResults[round.id] = null;
+    render();
+    renderTabs();
+    await sb.from('attendance').delete().eq('round_id', round.id).eq('member_name', name);
+    showToast(`${name} 삭제됨`);
 }
 
 function showWarning() {
@@ -432,6 +533,7 @@ async function resetCurrentRound() {
     const round = activeRound();
     if (!confirm(`${round.date} 참석 신청을 모두 초기화할까요?`)) return;
     attendance[round.id] = new Set();
+    guests[round.id] = new Set();
     groupResults[round.id] = null;
     render();
     await Promise.all([
@@ -462,6 +564,7 @@ async function addCustomRound() {
 
     rounds.push({ id, date, venue, is_custom: true });
     attendance[id] = new Set();
+    guests[id] = new Set();
     activeId = id;
     closeModal();
     render();
@@ -497,6 +600,8 @@ function showToast(msg) {
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 document.getElementById('inputVenue').addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomRound(); });
+document.getElementById('guestModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeGuestModal(); });
+document.getElementById('inputGuestName').addEventListener('keydown', function(e) { if (e.key === 'Enter') addGuest(); });
 
 init();
 </script>

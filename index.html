@@ -70,6 +70,11 @@
         .card-title { font-size: 15px; font-weight: 700; color: #1b4332; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
         .round-info-badge { display: inline-flex; align-items: center; gap: 6px; background: #d8f3dc; color: #1b4332; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
         .round-info-badge .venue-tag { background: #1b4332; color: #d8f3dc; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+        .round-detail-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+        .round-detail-item { display: inline-flex; align-items: center; gap: 5px; background: #f0faf4; border-radius: 8px; padding: 5px 10px; font-size: 13px; color: #2d6a4f; }
+        .round-detail-item .detail-icon { font-size: 13px; }
+        .btn-edit-round { background: none; border: 1.5px solid #d1e8da; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: #52b788; cursor: pointer; transition: all 0.15s; }
+        .btn-edit-round:hover { border-color: #52b788; background: #f0faf4; }
 
         /* Counter bar */
         .counter-bar { background: #1b4332; border-radius: 12px; padding: 13px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -279,6 +284,7 @@
                 <span class="venue-tag" id="roundVenueLabel"></span>
             </div>
         </div>
+        <div class="round-detail-bar" id="roundDetailBar"></div>
         <div class="counter-bar">
             <div>
                 <div class="label">참석 신청 인원</div>
@@ -361,6 +367,29 @@
 
             <div class="stats-sub-title">📋 라운드별 결과</div>
             <div id="roundScoreList" class="round-score-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Round Info Modal -->
+<div class="modal-overlay" id="roundInfoModalOverlay">
+    <div class="modal">
+        <h3>📋 라운드 정보</h3>
+        <div class="form-group">
+            <label>코스</label>
+            <input type="text" id="inputCourse" placeholder="예: 서코스, 동코스 등 (공란 가능)">
+        </div>
+        <div class="form-group">
+            <label>티타임</label>
+            <input type="text" id="inputTeeTime" placeholder="예: 07:30, 08:00 (공란 가능)">
+        </div>
+        <div class="form-group">
+            <label>그린피</label>
+            <input type="number" id="inputGreenfee" placeholder="예: 150000 (공란 가능)" min="0">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" style="flex:1" onclick="closeRoundInfoModal()">취소</button>
+            <button class="btn btn-primary" style="flex:2" onclick="saveRoundInfo()">저장</button>
         </div>
     </div>
 </div>
@@ -523,6 +552,7 @@ function render() {
 
     document.getElementById('roundDateLabel').textContent = round.date;
     document.getElementById('roundVenueLabel').textContent = round.venue;
+    renderRoundDetailBar(round);
 
     const n = sel.size;
     document.getElementById('countDisplay').innerHTML = `${n} <span>/ ${MAX}명</span>`;
@@ -901,6 +931,46 @@ async function saveManualAssign() {
     showToast('수동 조편성이 저장되었습니다');
 }
 
+// --- Round info ---
+function renderRoundDetailBar(round) {
+    const items = [];
+    if (round.course) items.push(`<div class="round-detail-item"><span class="detail-icon">🏌️</span>${round.course}</div>`);
+    if (round.tee_time) items.push(`<div class="round-detail-item"><span class="detail-icon">⏰</span>${round.tee_time}</div>`);
+    if (round.greenfee) items.push(`<div class="round-detail-item"><span class="detail-icon">💰</span>${Number(round.greenfee).toLocaleString()}원</div>`);
+    items.push(`<button class="btn-edit-round" onclick="openRoundInfoModal()">✏️ 정보 입력</button>`);
+    document.getElementById('roundDetailBar').innerHTML = items.join('');
+}
+
+function openRoundInfoModal() {
+    const round = activeRound();
+    document.getElementById('inputCourse').value = round.course || '';
+    document.getElementById('inputTeeTime').value = round.tee_time || '';
+    document.getElementById('inputGreenfee').value = round.greenfee || '';
+    document.getElementById('roundInfoModalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('inputCourse').focus(), 100);
+}
+
+function closeRoundInfoModal() {
+    document.getElementById('roundInfoModalOverlay').classList.remove('open');
+}
+
+async function saveRoundInfo() {
+    const round = activeRound();
+    const course = document.getElementById('inputCourse').value.trim() || null;
+    const tee_time = document.getElementById('inputTeeTime').value.trim() || null;
+    const greenfeeVal = document.getElementById('inputGreenfee').value.trim();
+    const greenfee = greenfeeVal ? parseInt(greenfeeVal) : null;
+
+    const { error } = await sb.from('rounds').update({ course, tee_time, greenfee }).eq('id', round.id);
+    if (error) { showToast('저장 실패: ' + error.message); return; }
+
+    const idx = rounds.findIndex(r => r.id === round.id);
+    rounds[idx] = { ...rounds[idx], course, tee_time, greenfee };
+    closeRoundInfoModal();
+    render();
+    showToast('라운드 정보가 저장되었습니다');
+}
+
 // --- Reset ---
 async function resetCurrentRound() {
     const round = activeRound();
@@ -1119,6 +1189,8 @@ function renderScoreStats(completedRounds) {
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 document.getElementById('manualModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeManualModal(); });
+document.getElementById('roundInfoModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeRoundInfoModal(); });
+document.getElementById('inputGreenfee').addEventListener('keydown', function(e) { if (e.key === 'Enter') saveRoundInfo(); });
 document.getElementById('inputVenue').addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomRound(); });
 document.getElementById('guestModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeGuestModal(); });
 document.getElementById('inputGuestName').addEventListener('keydown', function(e) { if (e.key === 'Enter') addGuest(); });

@@ -351,8 +351,10 @@ async function init() {
         const gRows = gRes.data || [];
         gRows.forEach(g => {
             if (!groupResults[g.round_id]) groupResults[g.round_id] = [[], [], []];
-            if (groupResults[g.round_id][g.group_index]) {
-                groupResults[g.round_id][g.group_index].push(g.member_name);
+            const grp = groupResults[g.round_id][g.group_index];
+            // 중복 방지: 그룹당 최대 4명, 동일 이름 중복 제외
+            if (grp && grp.length < 4 && !grp.includes(g.member_name)) {
+                grp.push(g.member_name);
             }
         });
 
@@ -557,11 +559,13 @@ async function assignGroups() {
     render();
     document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Save to DB
-    await sb.from('group_results').delete().eq('round_id', round.id);
-    const rows = [];
-    groups.forEach((g, gi) => g.forEach(name => rows.push({ round_id: round.id, group_index: gi, member_name: name })));
-    await sb.from('group_results').insert(rows);
+    // Save to DB: delete first, then insert to avoid duplicates
+    const { error: delErr } = await sb.from('group_results').delete().eq('round_id', round.id);
+    if (!delErr) {
+        const rows = [];
+        groups.forEach((g, gi) => g.forEach(name => rows.push({ round_id: round.id, group_index: gi, member_name: name })));
+        await sb.from('group_results').insert(rows);
+    }
     showToast('조편성이 저장되었습니다');
 }
 

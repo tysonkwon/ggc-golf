@@ -165,6 +165,25 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
         .modal-actions .btn { margin: 0; }
 
+        /* Manual assign modal */
+        .manual-modal { max-width: 420px; max-height: 88vh; overflow-y: auto; }
+        .manual-assign-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f4f1; }
+        .manual-assign-row:last-child { border-bottom: none; }
+        .manual-assign-name { font-size: 14px; font-weight: 600; color: #2d3748; flex: 1; }
+        .group-btn-set { display: flex; gap: 5px; }
+        .group-btn { padding: 5px 13px; border-radius: 8px; border: 2px solid #e2e8e4; background: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.13s; color: #9ca3af; }
+        .group-btn:hover { border-color: #aaa; color: #555; }
+        .group-btn.sel-a { border-color: #f59e0b; background: #fff8e1; color: #b45309; }
+        .group-btn.sel-b { border-color: #0ea5e9; background: #e0f2fe; color: #0369a1; }
+        .group-btn.sel-c { border-color: #ec4899; background: #fce7f3; color: #9d174d; }
+        .manual-count-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+        .mcb { flex: 1; border-radius: 8px; padding: 7px; text-align: center; font-size: 12px; font-weight: 700; }
+        .mcb-a { background: #fff8e1; color: #b45309; border: 1.5px solid #f59e0b; }
+        .mcb-b { background: #e0f2fe; color: #0369a1; border: 1.5px solid #0ea5e9; }
+        .mcb-c { background: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; }
+        .mcb .mcb-n { font-size: 18px; line-height: 1; }
+        .manual-error { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #856404; margin-top: 10px; display: none; }
+
         .reset-link { text-align: center; margin-top: 8px; }
         .reset-link a { color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; text-decoration: underline; }
         .reset-link a:hover { color: rgba(255,255,255,0.75); }
@@ -287,7 +306,10 @@
             <div class="absentees-label">이번 달 미참석</div>
             <div class="absentee-tags" id="absenteeTags"></div>
         </div>
-        <button class="btn btn-secondary" onclick="assignGroups()">🔀 다시 섞기</button>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-secondary" style="margin:0;flex:1" onclick="assignGroups()">🔀 다시 섞기</button>
+            <button class="btn btn-secondary" style="margin:0;flex:1" onclick="openManualModal()">✏️ 수동 편성</button>
+        </div>
 
         <!-- Score input section -->
         <div class="score-section" id="scoreSection">
@@ -339,6 +361,24 @@
 
             <div class="stats-sub-title">📋 라운드별 결과</div>
             <div id="roundScoreList" class="round-score-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Assign Modal -->
+<div class="modal-overlay" id="manualModalOverlay">
+    <div class="modal manual-modal">
+        <h3>✏️ 수동 조편성</h3>
+        <div class="manual-count-bar">
+            <div class="mcb mcb-a"><div class="mcb-n" id="mcbA">0</div>A조</div>
+            <div class="mcb mcb-b"><div class="mcb-n" id="mcbB">0</div>B조</div>
+            <div class="mcb mcb-c"><div class="mcb-n" id="mcbC">0</div>C조</div>
+        </div>
+        <div id="manualAssignRows"></div>
+        <div class="manual-error" id="manualError"></div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" style="flex:1" onclick="closeManualModal()">취소</button>
+            <button class="btn btn-primary" style="flex:2" onclick="saveManualAssign()">저장</button>
         </div>
     </div>
 </div>
@@ -750,6 +790,107 @@ async function saveScores() {
     document.getElementById('scoreSavedBadge').style.display = 'inline-flex';
 }
 
+// --- Manual assign ---
+let manualAssign = {}; // {name: 'a'|'b'|'c'|null}
+
+function openManualModal() {
+    const round = activeRound();
+    const sel = [...(attendance[round.id] || new Set())];
+    const existing = groupResults[round.id];
+
+    manualAssign = {};
+    sel.forEach(name => { manualAssign[name] = null; });
+    if (existing && existing[0] && existing[0].length > 0) {
+        existing.forEach((grp, gi) => {
+            const key = ['a','b','c'][gi];
+            grp.forEach(name => { if (name in manualAssign) manualAssign[name] = key; });
+        });
+    }
+
+    renderManualRows(sel);
+    document.getElementById('manualError').style.display = 'none';
+    document.getElementById('manualModalOverlay').classList.add('open');
+}
+
+function closeManualModal() {
+    document.getElementById('manualModalOverlay').classList.remove('open');
+}
+
+function renderManualRows(members) {
+    const counts = { a: 0, b: 0, c: 0 };
+    Object.values(manualAssign).forEach(v => { if (v) counts[v]++; });
+    document.getElementById('mcbA').textContent = counts.a;
+    document.getElementById('mcbB').textContent = counts.b;
+    document.getElementById('mcbC').textContent = counts.c;
+
+    document.getElementById('manualAssignRows').innerHTML = members.map(name => {
+        const cur = manualAssign[name];
+        return `
+            <div class="manual-assign-row">
+                <span class="manual-assign-name">${name}</span>
+                <div class="group-btn-set">
+                    <button class="group-btn${cur==='a'?' sel-a':''}" onclick="setManualGroup('${name}','a')">A</button>
+                    <button class="group-btn${cur==='b'?' sel-b':''}" onclick="setManualGroup('${name}','b')">B</button>
+                    <button class="group-btn${cur==='c'?' sel-c':''}" onclick="setManualGroup('${name}','c')">C</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function setManualGroup(name, grp) {
+    const round = activeRound();
+    const sel = [...(attendance[round.id] || new Set())];
+    const counts = { a: 0, b: 0, c: 0 };
+    Object.entries(manualAssign).forEach(([n, v]) => { if (v && n !== name) counts[v]++; });
+
+    if (manualAssign[name] === grp) {
+        manualAssign[name] = null;
+    } else {
+        if (counts[grp] >= 4) {
+            const errEl = document.getElementById('manualError');
+            errEl.textContent = `⚠️ ${grp.toUpperCase()}조는 최대 4명까지 가능합니다.`;
+            errEl.style.display = 'block';
+            setTimeout(() => { errEl.style.display = 'none'; }, 2000);
+            return;
+        }
+        manualAssign[name] = grp;
+    }
+    renderManualRows(sel);
+}
+
+async function saveManualAssign() {
+    const round = activeRound();
+    const sel = [...(attendance[round.id] || new Set())];
+
+    const unassigned = sel.filter(n => !manualAssign[n]);
+    if (unassigned.length > 0) {
+        const errEl = document.getElementById('manualError');
+        errEl.textContent = `⚠️ 미배정 멤버가 있습니다: ${unassigned.join(', ')}`;
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const groups = [
+        sel.filter(n => manualAssign[n] === 'a'),
+        sel.filter(n => manualAssign[n] === 'b'),
+        sel.filter(n => manualAssign[n] === 'c'),
+    ];
+
+    groupResults[round.id] = groups;
+    closeManualModal();
+    render();
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const { error: delErr } = await sb.from('group_results').delete().eq('round_id', round.id);
+    if (!delErr) {
+        const rows = [];
+        groups.forEach((g, gi) => g.forEach(name => rows.push({ round_id: round.id, group_index: gi, member_name: name })));
+        await sb.from('group_results').insert(rows);
+    }
+    showToast('수동 조편성이 저장되었습니다');
+}
+
 // --- Reset ---
 async function resetCurrentRound() {
     const round = activeRound();
@@ -967,6 +1108,7 @@ function renderScoreStats(completedRounds) {
 }
 
 document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('manualModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeManualModal(); });
 document.getElementById('inputVenue').addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomRound(); });
 document.getElementById('guestModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeGuestModal(); });
 document.getElementById('inputGuestName').addEventListener('keydown', function(e) { if (e.key === 'Enter') addGuest(); });

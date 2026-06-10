@@ -125,13 +125,13 @@
         .result-section { display: none; }
         .result-header { font-size: 15px; font-weight: 700; color: #1b4332; margin-bottom: 14px; }
         .group-card { border-radius: 12px; padding: 15px; margin-bottom: 10px; }
-        .group-a { background: linear-gradient(135deg, #fff8e1, #ffecb3); border-left: 4px solid #f59e0b; }
-        .group-b { background: linear-gradient(135deg, #e0f2fe, #bae6fd); border-left: 4px solid #0ea5e9; }
-        .group-c { background: linear-gradient(135deg, #fce7f3, #fbcfe8); border-left: 4px solid #ec4899; }
+        .group-1 { background: linear-gradient(135deg, #fff8e1, #ffecb3); border-left: 4px solid #f59e0b; }
+        .group-2 { background: linear-gradient(135deg, #e0f2fe, #bae6fd); border-left: 4px solid #0ea5e9; }
+        .group-3 { background: linear-gradient(135deg, #fce7f3, #fbcfe8); border-left: 4px solid #ec4899; }
         .group-label { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
-        .group-a .group-label { color: #b45309; }
-        .group-b .group-label { color: #0369a1; }
-        .group-c .group-label { color: #9d174d; }
+        .group-1 .group-label { color: #b45309; }
+        .group-2 .group-label { color: #0369a1; }
+        .group-3 .group-label { color: #9d174d; }
         .group-members-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
         .group-member-chip { background: rgba(255,255,255,0.85); border-radius: 8px; padding: 8px 10px; font-size: 14px; font-weight: 600; text-align: center; }
 
@@ -145,9 +145,9 @@
         .score-section-title { font-size: 13px; font-weight: 700; color: #1b4332; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         .score-group { margin-bottom: 12px; }
         .score-group-label { font-size: 12px; font-weight: 700; margin-bottom: 7px; }
-        .group-a .score-group-label { color: #b45309; }
-        .group-b .score-group-label { color: #0369a1; }
-        .group-c .score-group-label { color: #9d174d; }
+        .group-1 .score-group-label { color: #b45309; }
+        .group-2 .score-group-label { color: #0369a1; }
+        .group-3 .score-group-label { color: #9d174d; }
         .score-rows { display: flex; flex-direction: column; gap: 6px; }
         .score-row { display: flex; align-items: center; gap: 8px; }
         .score-row .s-name { flex: 1; font-size: 13px; font-weight: 600; color: #2d3748; }
@@ -183,9 +183,9 @@
         .group-btn.sel-c { border-color: #ec4899; background: #fce7f3; color: #9d174d; }
         .manual-count-bar { display: flex; gap: 8px; margin-bottom: 14px; }
         .mcb { flex: 1; border-radius: 8px; padding: 7px; text-align: center; font-size: 12px; font-weight: 700; }
-        .mcb-a { background: #fff8e1; color: #b45309; border: 1.5px solid #f59e0b; }
-        .mcb-b { background: #e0f2fe; color: #0369a1; border: 1.5px solid #0ea5e9; }
-        .mcb-c { background: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; }
+        .mcb-1 { background: #fff8e1; color: #b45309; border: 1.5px solid #f59e0b; }
+        .mcb-2 { background: #e0f2fe; color: #0369a1; border: 1.5px solid #0ea5e9; }
+        .mcb-3 { background: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; }
         .mcb .mcb-n { font-size: 18px; line-height: 1; }
         .manual-error { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #856404; margin-top: 10px; display: none; }
 
@@ -312,9 +312,10 @@
             <div class="absentees-label">이번 달 미참석</div>
             <div class="absentee-tags" id="absenteeTags"></div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="btn btn-secondary" style="margin:0;flex:1" onclick="assignGroups()">🔀 다시 섞기</button>
-            <button class="btn btn-secondary" style="margin:0;flex:1" onclick="openManualModal()">✏️ 수동 편성</button>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" style="margin:0;flex:1;min-width:100px" onclick="assignGroups()">🔀 다시 섞기</button>
+            <button class="btn btn-secondary" style="margin:0;flex:1;min-width:100px" onclick="openManualModal()">✏️ 수동 편성</button>
+            <button class="btn btn-secondary" style="margin:0;flex:1;min-width:100px" onclick="copyGroupText()">📋 단톡 복사</button>
         </div>
 
         <!-- Score input section -->
@@ -399,9 +400,9 @@
     <div class="modal manual-modal">
         <h3>✏️ 수동 조편성</h3>
         <div class="manual-count-bar">
-            <div class="mcb mcb-a"><div class="mcb-n" id="mcbA">0</div>A조</div>
-            <div class="mcb mcb-b"><div class="mcb-n" id="mcbB">0</div>B조</div>
-            <div class="mcb mcb-c"><div class="mcb-n" id="mcbC">0</div>C조</div>
+            <div class="mcb mcb-1"><div class="mcb-n" id="mcb1">0</div>1조</div>
+            <div class="mcb mcb-2"><div class="mcb-n" id="mcb2">0</div>2조</div>
+            <div class="mcb mcb-3"><div class="mcb-n" id="mcb3">0</div>3조</div>
         </div>
         <div id="manualAssignRows"></div>
         <div class="manual-error" id="manualError"></div>
@@ -751,9 +752,9 @@ async function assignGroups() {
 
 function renderGroupResult(groups, sel) {
     const configs = [
-        { cls: 'group-a', label: '🟠 A조' },
-        { cls: 'group-b', label: '🔵 B조' },
-        { cls: 'group-c', label: '🩷 C조' }
+        { cls: 'group-1', label: '🟠 1조' },
+        { cls: 'group-2', label: '🔵 2조' },
+        { cls: 'group-3', label: '🩷 3조' }
     ];
     document.getElementById('groupResults').innerHTML = groups.map((g, i) => `
         <div class="group-card ${configs[i].cls}">
@@ -772,9 +773,9 @@ function renderGroupResult(groups, sel) {
 // --- Score input ---
 function renderScoreInputs(roundId, groups) {
     const configs = [
-        { cls: 'group-a', label: '🟠 A조' },
-        { cls: 'group-b', label: '🔵 B조' },
-        { cls: 'group-c', label: '🩷 C조' }
+        { cls: 'group-1', label: '🟠 1조' },
+        { cls: 'group-2', label: '🔵 2조' },
+        { cls: 'group-3', label: '🩷 3조' }
     ];
     const roundScores = scores[roundId] || {};
     const hasSaved = Object.keys(roundScores).length > 0;
@@ -837,7 +838,7 @@ async function saveScores() {
 }
 
 // --- Manual assign ---
-let manualAssign = {}; // {name: 'a'|'b'|'c'|null}
+let manualAssign = {}; // {name: '1'|'2'|'3'|null}
 
 function openManualModal() {
     const round = activeRound();
@@ -846,9 +847,9 @@ function openManualModal() {
 
     manualAssign = {};
     sel.forEach(name => { manualAssign[name] = null; });
-    if (existing && existing[0] && existing[0].length > 0) {
+    if (existing && existing.some(g => g.length > 0)) {
         existing.forEach((grp, gi) => {
-            const key = ['a','b','c'][gi];
+            const key = ['1','2','3'][gi];
             grp.forEach(name => { if (name in manualAssign) manualAssign[name] = key; });
         });
     }
@@ -863,11 +864,11 @@ function closeManualModal() {
 }
 
 function renderManualRows(members) {
-    const counts = { a: 0, b: 0, c: 0 };
+    const counts = { '1': 0, '2': 0, '3': 0 };
     Object.values(manualAssign).forEach(v => { if (v) counts[v]++; });
-    document.getElementById('mcbA').textContent = counts.a;
-    document.getElementById('mcbB').textContent = counts.b;
-    document.getElementById('mcbC').textContent = counts.c;
+    document.getElementById('mcb1').textContent = counts['1'];
+    document.getElementById('mcb2').textContent = counts['2'];
+    document.getElementById('mcb3').textContent = counts['3'];
 
     document.getElementById('manualAssignRows').innerHTML = members.map(name => {
         const cur = manualAssign[name];
@@ -875,9 +876,9 @@ function renderManualRows(members) {
             <div class="manual-assign-row">
                 <span class="manual-assign-name">${name}</span>
                 <div class="group-btn-set">
-                    <button class="group-btn${cur==='a'?' sel-a':''}" onclick="setManualGroup('${name}','a')">A</button>
-                    <button class="group-btn${cur==='b'?' sel-b':''}" onclick="setManualGroup('${name}','b')">B</button>
-                    <button class="group-btn${cur==='c'?' sel-c':''}" onclick="setManualGroup('${name}','c')">C</button>
+                    <button class="group-btn${cur==='1'?' sel-a':''}" onclick="setManualGroup('${name}','1')">1조</button>
+                    <button class="group-btn${cur==='2'?' sel-b':''}" onclick="setManualGroup('${name}','2')">2조</button>
+                    <button class="group-btn${cur==='3'?' sel-c':''}" onclick="setManualGroup('${name}','3')">3조</button>
                 </div>
             </div>
         `;
@@ -887,7 +888,7 @@ function renderManualRows(members) {
 function setManualGroup(name, grp) {
     const round = activeRound();
     const sel = [...(attendance[round.id] || new Set())];
-    const counts = { a: 0, b: 0, c: 0 };
+    const counts = { '1': 0, '2': 0, '3': 0 };
     Object.entries(manualAssign).forEach(([n, v]) => { if (v && n !== name) counts[v]++; });
 
     if (manualAssign[name] === grp) {
@@ -895,7 +896,7 @@ function setManualGroup(name, grp) {
     } else {
         if (counts[grp] >= 4) {
             const errEl = document.getElementById('manualError');
-            errEl.textContent = `⚠️ ${grp.toUpperCase()}조는 최대 4명까지 가능합니다.`;
+            errEl.textContent = `⚠️ ${grp}조는 최대 4명까지 가능합니다.`;
             errEl.style.display = 'block';
             setTimeout(() => { errEl.style.display = 'none'; }, 2000);
             return;
@@ -918,9 +919,9 @@ async function saveManualAssign() {
     }
 
     const groups = [
-        sel.filter(n => manualAssign[n] === 'a'),
-        sel.filter(n => manualAssign[n] === 'b'),
-        sel.filter(n => manualAssign[n] === 'c'),
+        sel.filter(n => manualAssign[n] === '1'),
+        sel.filter(n => manualAssign[n] === '2'),
+        sel.filter(n => manualAssign[n] === '3'),
     ];
 
     groupResults[round.id] = groups;
@@ -935,6 +936,40 @@ async function saveManualAssign() {
         await sb.from('group_results').insert(rows);
     }
     showToast('수동 조편성이 저장되었습니다');
+}
+
+// --- Copy group text ---
+function copyGroupText() {
+    const round = activeRound();
+    const groups = groupResults[round.id];
+    if (!groups || !groups.some(g => g.length > 0)) {
+        showToast('조편성 결과가 없습니다');
+        return;
+    }
+
+    const labels = ['🟠 1조', '🔵 2조', '🩷 3조'];
+    let text = `⛳ ${round.date} ${round.venue} 조편성\n\n`;
+    groups.forEach((g, i) => {
+        if (g.length === 0) return;
+        text += `${labels[i]}\n${g.join(' / ')}\n\n`;
+    });
+    if (round.course) text += `🏌️ 코스: ${round.course}\n`;
+    if (round.tee_time) text += `⏰ 티타임: ${round.tee_time}\n`;
+    if (round.greenfee) text += `💰 그린피: ${Number(round.greenfee).toLocaleString()}원\n`;
+
+    navigator.clipboard.writeText(text.trim()).then(() => {
+        showToast('클립보드에 복사됐습니다 📋');
+    }).catch(() => {
+        // fallback for older browsers
+        const ta = document.createElement('textarea');
+        ta.value = text.trim();
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('클립보드에 복사됐습니다 📋');
+    });
 }
 
 // --- Round info ---

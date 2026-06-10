@@ -324,6 +324,11 @@
         .rsc.best-score { border-color: #0ea5e9; background: #e0f2fe; }
         .rsc.best-score .rsc-score { color: #0369a1; }
 
+        /* Notes */
+        .round-notes { background: var(--surface); border-left: 3px solid #52b788; border-radius: 0 8px 8px 0; padding: 10px 13px; margin-bottom: 14px; display: none; }
+        .round-notes .notes-label { font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+        .round-notes .notes-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+
         /* Toast */
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1b4332; color: white; padding: 11px 22px; border-radius: 30px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 300; white-space: nowrap; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -362,6 +367,10 @@
             </div>
         </div>
         <div class="round-detail-bar" id="roundDetailBar"></div>
+        <div class="round-notes" id="roundNotes">
+            <div class="notes-label">📝 비고</div>
+            <div class="notes-text"></div>
+        </div>
         <div class="counter-bar">
             <div>
                 <div class="label">참석 신청 인원</div>
@@ -464,6 +473,12 @@
         <div class="form-group">
             <label>그린피</label>
             <input type="number" id="inputGreenfee" placeholder="예: 150000 (공란 가능)" min="0">
+        </div>
+        <div class="form-group">
+            <label>비고</label>
+            <textarea id="inputNotes" placeholder="공지사항, 준비물 등 자유롭게 입력 (공란 가능)"
+                style="width:100%;padding:11px 14px;border:2px solid var(--input-border);border-radius:10px;font-size:14px;outline:none;transition:border-color 0.15s;resize:vertical;min-height:80px;font-family:inherit;background:var(--card-bg);color:var(--text-secondary);"
+                onfocus="this.style.borderColor='var(--input-focus)'" onblur="this.style.borderColor='var(--input-border)'"></textarea>
         </div>
         <div class="modal-actions">
             <button class="btn btn-secondary" style="flex:1" onclick="closeRoundInfoModal()">취소</button>
@@ -1067,6 +1082,14 @@ function renderRoundDetailBar(round) {
     if (round.greenfee) items.push(`<div class="round-detail-item"><span class="detail-icon">💰</span>${Number(round.greenfee).toLocaleString()}원</div>`);
     items.push(`<button class="btn-edit-round" onclick="openRoundInfoModal()">✏️ 정보 입력</button>`);
     document.getElementById('roundDetailBar').innerHTML = items.join('');
+
+    const notesEl = document.getElementById('roundNotes');
+    if (round.notes) {
+        notesEl.style.display = 'block';
+        notesEl.querySelector('.notes-text').textContent = round.notes;
+    } else {
+        notesEl.style.display = 'none';
+    }
 }
 
 function openRoundInfoModal() {
@@ -1074,6 +1097,7 @@ function openRoundInfoModal() {
     document.getElementById('inputCourse').value = round.course || '';
     document.getElementById('inputTeeTime').value = round.tee_time || '';
     document.getElementById('inputGreenfee').value = round.greenfee || '';
+    document.getElementById('inputNotes').value = round.notes || '';
     document.getElementById('roundInfoModalOverlay').classList.add('open');
     setTimeout(() => document.getElementById('inputCourse').focus(), 100);
 }
@@ -1088,12 +1112,13 @@ async function saveRoundInfo() {
     const tee_time = document.getElementById('inputTeeTime').value.trim() || null;
     const greenfeeVal = document.getElementById('inputGreenfee').value.trim();
     const greenfee = greenfeeVal ? parseInt(greenfeeVal) : null;
+    const notes = document.getElementById('inputNotes').value.trim() || null;
 
-    const { error } = await sb.from('rounds').update({ course, tee_time, greenfee }).eq('id', round.id);
+    const { error } = await sb.from('rounds').update({ course, tee_time, greenfee, notes }).eq('id', round.id);
     if (error) { showToast('저장 실패: ' + error.message); return; }
 
     const idx = rounds.findIndex(r => r.id === round.id);
-    rounds[idx] = { ...rounds[idx], course, tee_time, greenfee };
+    rounds[idx] = { ...rounds[idx], course, tee_time, greenfee, notes };
     closeRoundInfoModal();
     render();
     showToast('라운드 정보가 저장되었습니다');

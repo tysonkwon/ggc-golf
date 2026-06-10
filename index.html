@@ -601,7 +601,7 @@ function render() {
 
     const groups = groupResults[round.id];
     const resultCard = document.getElementById('resultCard');
-    if (groups && groups[0] && groups[0].length > 0) {
+    if (groups && groups.some(g => g.length > 0)) {
         resultCard.style.display = 'block';
         renderGroupResult(groups, sel);
         renderScoreInputs(round.id, groups);
@@ -649,15 +649,19 @@ async function toggleMember(name) {
     if (sel.has(name)) {
         sel.delete(name);
         attendance[round.id] = sel;
-        groupResults[round.id] = null;
+        // 조편성에서 해당 멤버만 제거
+        const grps = groupResults[round.id];
+        if (grps) groupResults[round.id] = grps.map(g => g.filter(n => n !== name));
         render();
         await sb.from('attendance').delete()
+            .eq('round_id', round.id).eq('member_name', name);
+        await sb.from('group_results').delete()
             .eq('round_id', round.id).eq('member_name', name);
     } else {
         if (sel.size >= MAX) { showWarning(); return; }
         sel.add(name);
         attendance[round.id] = sel;
-        groupResults[round.id] = null;
+        // 조편성은 그대로 유지 (새 멤버는 미배정)
         render();
         await sb.from('attendance').upsert({ round_id: round.id, member_name: name, is_guest: isGuest });
     }
@@ -697,10 +701,12 @@ async function removeGuest(name) {
     const round = activeRound();
     guests[round.id].delete(name);
     attendance[round.id].delete(name);
-    groupResults[round.id] = null;
+    const grps = groupResults[round.id];
+    if (grps) groupResults[round.id] = grps.map(g => g.filter(n => n !== name));
     render();
     renderTabs();
     await sb.from('attendance').delete().eq('round_id', round.id).eq('member_name', name);
+    await sb.from('group_results').delete().eq('round_id', round.id).eq('member_name', name);
     showToast(`${name} 삭제됨`);
 }
 
@@ -1063,7 +1069,7 @@ function switchPage(page) {
 function renderStats() {
     const completedRounds = rounds.filter(r => {
         const g = groupResults[r.id];
-        return g && g[0] && g[0].length > 0;
+        return g && g.some(grp => grp.length > 0);
     });
     const totalRounds = completedRounds.length;
 

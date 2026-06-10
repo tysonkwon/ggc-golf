@@ -609,6 +609,7 @@ async function init() {
 
         activeId = getDefaultRoundId();
         render();
+        setTimeout(() => scrollActiveTabToCenter(false), 80);
     } catch(e) {
         showToast('데이터 로드 실패: ' + e.message);
     }
@@ -704,14 +705,23 @@ function renderTabs() {
     }).join('') + `<div class="tab-btn add-tab" onclick="openModal()" title="라운드 추가">＋</div>`;
 }
 
+function scrollActiveTabToCenter(smooth) {
+    const idx = rounds.findIndex(r => r.id === activeId);
+    const tabs = document.querySelectorAll('.tab-btn:not(.add-tab)');
+    const tab = tabs[idx];
+    const scroll = document.querySelector('.tab-scroll');
+    if (!tab || !scroll) return;
+    const tabLeft = tab.offsetLeft;
+    const tabWidth = tab.offsetWidth;
+    const scrollWidth = scroll.offsetWidth;
+    const target = tabLeft - (scrollWidth / 2) + (tabWidth / 2);
+    scroll.scrollTo({ left: target, behavior: smooth ? 'smooth' : 'instant' });
+}
+
 function switchTab(id) {
     activeId = id;
     render();
-    setTimeout(() => {
-        const idx = rounds.findIndex(r => r.id === id);
-        const tabs = document.querySelectorAll('.tab-btn:not(.add-tab)');
-        if (tabs[idx]) tabs[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }, 50);
+    setTimeout(() => scrollActiveTabToCenter(true), 50);
 }
 
 // --- Toggle member ---

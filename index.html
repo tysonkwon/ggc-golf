@@ -463,6 +463,14 @@
     <div class="modal">
         <h3>📋 라운드 정보</h3>
         <div class="form-group">
+            <label>날짜</label>
+            <input type="text" id="inputRoundDate" placeholder="예: 6/19(금)">
+        </div>
+        <div class="form-group">
+            <label>골프장</label>
+            <input type="text" id="inputRoundVenue" placeholder="예: 블랙스톤, 뉴서울">
+        </div>
+        <div class="form-group">
             <label>코스</label>
             <input type="text" id="inputCourse" placeholder="예: 서코스, 동코스 등 (공란 가능)">
         </div>
@@ -1094,12 +1102,14 @@ function renderRoundDetailBar(round) {
 
 function openRoundInfoModal() {
     const round = activeRound();
+    document.getElementById('inputRoundDate').value = round.date || '';
+    document.getElementById('inputRoundVenue').value = round.venue || '';
     document.getElementById('inputCourse').value = round.course || '';
     document.getElementById('inputTeeTime').value = round.tee_time || '';
     document.getElementById('inputGreenfee').value = round.greenfee || '';
     document.getElementById('inputNotes').value = round.notes || '';
     document.getElementById('roundInfoModalOverlay').classList.add('open');
-    setTimeout(() => document.getElementById('inputCourse').focus(), 100);
+    setTimeout(() => document.getElementById('inputRoundDate').focus(), 100);
 }
 
 function closeRoundInfoModal() {
@@ -1108,19 +1118,24 @@ function closeRoundInfoModal() {
 
 async function saveRoundInfo() {
     const round = activeRound();
+    const date = document.getElementById('inputRoundDate').value.trim();
+    const venue = document.getElementById('inputRoundVenue').value.trim();
+    if (!date || !venue) { showToast('날짜와 골프장은 필수입니다'); return; }
     const course = document.getElementById('inputCourse').value.trim() || null;
     const tee_time = document.getElementById('inputTeeTime').value.trim() || null;
     const greenfeeVal = document.getElementById('inputGreenfee').value.trim();
     const greenfee = greenfeeVal ? parseInt(greenfeeVal) : null;
     const notes = document.getElementById('inputNotes').value.trim() || null;
 
-    const { error } = await sb.from('rounds').update({ course, tee_time, greenfee, notes }).eq('id', round.id);
+    const { error } = await sb.from('rounds').update({ date, venue, course, tee_time, greenfee, notes }).eq('id', round.id);
     if (error) { showToast('저장 실패: ' + error.message); return; }
 
     const idx = rounds.findIndex(r => r.id === round.id);
-    rounds[idx] = { ...rounds[idx], course, tee_time, greenfee, notes };
+    rounds[idx] = { ...rounds[idx], date, venue, course, tee_time, greenfee, notes };
+    sortRounds();
     closeRoundInfoModal();
     render();
+    setTimeout(() => scrollActiveTabToCenter(false), 80);
     showToast('라운드 정보가 저장되었습니다');
 }
 

@@ -446,7 +446,7 @@
                         <th>평균</th>
                         <th>최저</th>
                         <th>최고</th>
-                        <th>횟수</th>
+                        <th>횟수(참석률)</th>
                     </tr>
                 </thead>
                 <tbody id="scoreStatsBody"></tbody>
@@ -1229,9 +1229,14 @@ function switchPage(page) {
 
 // --- Stats ---
 function renderStats() {
+    const todayOrder = parseDateOrder(
+        (() => { const n = new Date(); return `${n.getMonth()+1}/${n.getDate()}`; })()
+    );
+
+    // 조편성 완료 + 오늘 이하 라운드만
     const completedRounds = rounds.filter(r => {
         const g = groupResults[r.id];
-        return g && g.some(grp => grp.length > 0);
+        return g && g.some(grp => grp.length > 0) && parseDateOrder(r.date) <= todayOrder;
     });
     const totalRounds = completedRounds.length;
 
@@ -1282,47 +1287,61 @@ function renderStats() {
         document.getElementById('statsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9aab9d;padding:24px">조편성이 완료된 라운드가 없습니다</td></tr>`;
     }
 
-    renderScoreStats(completedRounds);
+    renderScoreStats(completedRounds, totalRounds);
 }
 
-function renderScoreStats(completedRounds) {
-    // 개인 타수 통계
+function renderScoreStats(completedRounds, totalRounds) {
     const memberScoreStats = MEMBERS.map(name => {
+        const attCount = completedRounds.filter(r => (attendance[r.id] || new Set()).has(name)).length;
+        const attRate = totalRounds > 0 ? attCount / totalRounds : 0;
         const memberScores = completedRounds
             .map(r => scores[r.id] && scores[r.id][name])
             .filter(s => s !== undefined && s !== null);
-        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0 };
+        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0, attRate, qualified: attRate >= 0.3 };
         const avg = memberScores.reduce((a, b) => a + b, 0) / memberScores.length;
         return {
             name,
             avg: Math.round(avg * 10) / 10,
             best: Math.min(...memberScores),
             worst: Math.max(...memberScores),
-            count: memberScores.length
+            count: memberScores.length,
+            attRate,
+            qualified: attRate >= 0.3
         };
-    }).filter(m => m.count > 0).sort((a, b) => a.avg - b.avg);
+    }).filter(m => m.count > 0);
+
+    const qualified = memberScoreStats.filter(m => m.qualified).sort((a, b) => a.avg - b.avg);
+    const disqualified = memberScoreStats.filter(m => !m.qualified).sort((a, b) => a.avg - b.avg);
+
+    const renderRow = (m, i, showRank) => {
+        const rankClass = showRank ? (i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n') : 'rank-n';
+        const rankLabel = showRank && i < 3 ? i + 1 : '';
+        const rateText = totalRounds > 0 ? Math.round(m.attRate * 100) + '%' : '-';
+        return `
+            <tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:7px">
+                        <span class="rank-badge ${rankClass}">${rankLabel}</span>
+                        ${m.name}
+                    </div>
+                </td>
+                <td><span class="score-val">${m.avg}</span></td>
+                <td><span class="score-best">${m.best}</span></td>
+                <td><span class="score-worst">${m.worst}</span></td>
+                <td><span style="color:var(--text-muted);font-size:12px">${m.count}회 (${rateText})</span></td>
+            </tr>
+        `;
+    };
 
     if (memberScoreStats.length === 0) {
         document.getElementById('scoreStatsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9aab9d;padding:16px">저장된 타수 기록이 없습니다</td></tr>`;
     } else {
-        document.getElementById('scoreStatsBody').innerHTML = memberScoreStats.map((m, i) => {
-            const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
-            const rankLabel = i < 3 ? i + 1 : '';
-            return `
-                <tr>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:7px">
-                            <span class="rank-badge ${rankClass}">${rankLabel}</span>
-                            ${m.name}
-                        </div>
-                    </td>
-                    <td><span class="score-val">${m.avg}</span></td>
-                    <td><span class="score-best">${m.best}</span></td>
-                    <td><span class="score-worst">${m.worst}</span></td>
-                    <td><span style="color:#6b7e72;font-size:12px">${m.count}회</span></td>
-                </tr>
-            `;
-        }).join('');
+        let html = qualified.map((m, i) => renderRow(m, i, true)).join('');
+        if (disqualified.length > 0) {
+            html += `<tr><td colspan="5" style="padding:10px 4px 4px;font-size:11px;font-weight:700;color:#9aab9d;letter-spacing:0.4px;text-transform:uppercase">규정타석 미달 (참석률 30% 미만)</td></tr>`;
+            html += disqualified.map((m, i) => renderRow(m, i, false)).join('');
+        }
+        document.getElementById('scoreStatsBody').innerHTML = html;
     }
 
     // 라운드별 결과

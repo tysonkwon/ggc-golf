@@ -1118,8 +1118,8 @@ function renderRoundDetailBar(round) {
     if (round.course) items.push(`<div class="round-detail-item"><span class="detail-icon">🏌️</span>${round.course}</div>`);
     if (round.tee_time) items.push(`<div class="round-detail-item"><span class="detail-icon">⏰</span>${round.tee_time}</div>`);
     if (round.greenfee) items.push(`<div class="round-detail-item"><span class="detail-icon">💰</span>${Number(round.greenfee).toLocaleString()}원</div>`);
-    items.push(`<button class="btn-edit-round" onclick="openRoundInfoModal()">✏️ 정보 입력</button>`);
-    items.push(`<button class="btn-edit-round" style="color:#c0392b;border-color:#fcc" onclick="deleteCurrentRound()">🗑️ 삭제</button>`);
+    items.push(`<button class="btn-edit-round" onclick="openRoundInfoModal()">✏️ 정보입력/수정</button>`);
+    items.push(`<button class="btn-edit-round" style="color:#c0392b;border-color:#fcc" onclick="deleteCurrentRound()">🗑️ 라운드삭제</button>`);
     document.getElementById('roundDetailBar').innerHTML = items.join('');
 
     const notesEl = document.getElementById('roundNotes');

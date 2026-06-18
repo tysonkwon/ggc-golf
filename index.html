@@ -481,7 +481,7 @@
         </div>
         <div class="form-group">
             <label>티타임</label>
-            <input type="text" id="inputTeeTime" placeholder="예: 07:30, 08:00 (공란 가능)">
+            <input type="text" id="inputTeeTime" placeholder="예: 08:00, 08:07, 08:15 (콤마로 조별 구분)">
         </div>
         <div class="form-group">
             <label>그린피</label>
@@ -893,15 +893,25 @@ async function assignGroups() {
     showToast('조편성이 저장되었습니다');
 }
 
+function getTeeTimes(round) {
+    if (!round || !round.tee_time) return [];
+    return round.tee_time.split(',').map(t => t.trim()).filter(Boolean);
+}
+
 function renderGroupResult(groups, sel) {
-    document.getElementById('groupResults').innerHTML = groups.map((g, i) => `
+    const round = activeRound();
+    const teeTimes = getTeeTimes(round);
+    document.getElementById('groupResults').innerHTML = groups.map((g, i) => {
+        const tee = teeTimes[i] ? ` <span style="font-size:13px;font-weight:600;opacity:0.75">⏰ ${teeTimes[i]}</span>` : '';
+        return `
         <div class="group-card ${GROUP_CONFIGS[i].cls}">
-            <div class="group-label">${GROUP_CONFIGS[i].label}</div>
+            <div class="group-label">${GROUP_CONFIGS[i].label}${tee}</div>
             <div class="group-members-grid">
                 ${g.map(n => `<div class="group-member-chip">${n}</div>`).join('')}
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 
     const absentees = MEMBERS.filter(m => !sel.has(m));
     document.getElementById('absenteeTags').innerHTML =
@@ -1088,13 +1098,14 @@ function copyGroupText() {
         return;
     }
 
+    const teeTimes = getTeeTimes(round);
     let text = `⛳ ${round.date} ${round.venue} 조편성\n\n`;
     groups.forEach((g, i) => {
         if (g.length === 0) return;
-        text += `${GROUP_CONFIGS[i].label}\n${g.join(' / ')}\n\n`;
+        const tee = teeTimes[i] ? ` (⏰ ${teeTimes[i]})` : '';
+        text += `${GROUP_CONFIGS[i].label}${tee}\n${g.join(' / ')}\n\n`;
     });
     if (round.course) text += `🏌️ 코스: ${round.course}\n`;
-    if (round.tee_time) text += `⏰ 티타임: ${round.tee_time}\n`;
     if (round.greenfee) text += `💰 그린피: ${Number(round.greenfee).toLocaleString()}원\n`;
 
     navigator.clipboard.writeText(text.trim()).then(() => {

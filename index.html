@@ -41,41 +41,6 @@
             --manual-name-color: #2d3748;
             --score-name-color: #2d3748;
         }
-        body.dark {
-            --bg-grad-start: #0d1f18;
-            --bg-grad-mid: #162e22;
-            --card-bg: #1a2e24;
-            --card-shadow: 0 6px 24px rgba(0,0,0,0.5);
-            --text-primary: #95d5b2;
-            --text-secondary: #c8e6d8;
-            --text-muted: #7aab8e;
-            --text-faint: #4d7a62;
-            --border: #2a4a38;
-            --border-light: #243d2f;
-            --surface: #1f3829;
-            --surface-alt: #1a2e24;
-            --surface-hover: #243d2f;
-            --counter-bg: #0d1f18;
-            --badge-bg: #1f3829;
-            --badge-text: #95d5b2;
-            --input-border: #2a4a38;
-            --input-focus: #52b788;
-            --modal-bg: #1a2e24;
-            --modal-label: #7aab8e;
-            --absentee-bg: #243d2f;
-            --absentee-text: #7aab8e;
-            --detail-item-bg: #1f3829;
-            --detail-item-text: #95d5b2;
-            --stats-row-hover: #1f3829;
-            --rsc-bg: #1f3829;
-            --rsc-border: #2a4a38;
-            --round-score-bg: #1f3829;
-            --summary-box-bg: #1f3829;
-            --manual-row-border: #243d2f;
-            --manual-name-color: #c8e6d8;
-            --score-name-color: #c8e6d8;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -135,10 +100,6 @@
         .tab-btn.complete.active { background: #d8f3dc; color: #1b4332; border-color: #52b788; box-shadow: 0 4px 14px rgba(82,183,136,0.3); }
         .tab-btn.add-tab { font-size: 20px; color: rgba(255,255,255,0.7); min-width: 48px; padding: 9px 12px; }
         .tab-btn.add-tab:hover { color: white; }
-        /* 다크모드 active 탭 — 밝은 민트로 강조 */
-        body.dark .tab-btn.active { background: #95d5b2; color: #0d1f18; border-color: #95d5b2; box-shadow: 0 4px 18px rgba(149,213,178,0.4); }
-        body.dark .tab-btn.incomplete.active { background: #fca5a5; color: #3b0a0a; border-color: #f87171; box-shadow: 0 4px 14px rgba(248,113,113,0.3); }
-        body.dark .tab-btn.complete.active { background: #6ee7b7; color: #0d1f18; border-color: #6ee7b7; box-shadow: 0 4px 18px rgba(110,231,183,0.35); }
 
         /* Card */
         .card { background: var(--card-bg); border-radius: 18px; padding: 20px; margin-bottom: 12px; box-shadow: var(--card-shadow); transition: background 0.4s, box-shadow 0.4s; }
@@ -195,8 +156,6 @@
         .btn-secondary:hover { background: var(--surface-hover); }
         .btn-danger { background: #fff0f0; color: #c0392b; margin-top: 8px; font-size: 13px; padding: 10px; }
         .btn-danger:hover { background: #ffe0e0; }
-        body.dark .btn-danger { background: #2a1a1a; color: #f87171; }
-        body.dark .btn-danger:hover { background: #3a2020; }
 
         /* Result */
         .result-section { display: none; }
@@ -1426,17 +1385,6 @@ document.getElementById('inputGreenfee').addEventListener('keydown', function(e)
 document.getElementById('inputVenue').addEventListener('keydown', function(e) { if (e.key === 'Enter') addCustomRound(); });
 document.getElementById('guestModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeGuestModal(); });
 document.getElementById('inputGuestName').addEventListener('keydown', function(e) { if (e.key === 'Enter') addGuest(); });
-
-// --- Theme ---
-function applyTheme() {
-    const h = new Date().getHours();
-    // 오전 6시 ~ 오후 7시: 라이트, 그 외: 다크
-    const isDark = h < 6 || h >= 19;
-    document.body.classList.toggle('dark', isDark);
-}
-applyTheme();
-// 정각마다 체크 (탭을 열어둔 상태에서 시간 넘어갈 때 대응)
-setInterval(applyTheme, 60 * 1000);
 
 init();
 </script>

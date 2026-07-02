@@ -433,7 +433,9 @@
         </div>
         <div class="form-group">
             <label>골프장</label>
-            <input type="text" id="inputRoundVenue" placeholder="예: 블랙스톤, 뉴서울">
+            <input type="text" id="inputRoundVenue" placeholder="예: 블랙스톤, 뉴서울"
+                autocomplete="off" oninput="onVenueInput(this.value)" onchange="onVenueChange(this.value)">
+            <div id="venueDropdown" style="display:none;position:absolute;z-index:9999;background:var(--card-bg);border:1.5px solid var(--input-focus);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.12);max-height:180px;overflow-y:auto;width:calc(100% - 0px);margin-top:2px"></div>
         </div>
         <div class="form-group">
             <label>코스</label>
@@ -528,6 +530,91 @@
 const SUPABASE_URL = 'https://rjxtdrkdabnpyohasiyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_YYLwxN1W8rpkfTF0_PvpCA_60mL7iu4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// KGA 코스레이팅 DB (골프장명: [{코스, 티세트, 남/여, cr, sr}])
+// 남자 기준 데이터만 포함 (여자 별도 필요시 확장)
+const COURSE_DB = {
+    '뉴서울': [
+        { course: '예술(아웃+인)', tee: 'BLUE', cr: 72.8, sr: 132 },
+        { course: '예술(아웃+인)', tee: 'WHITE', cr: 70.1, sr: 129 },
+        { course: '문화(아웃+인)', tee: 'Back', cr: 74.3, sr: 135 },
+        { course: '문화(아웃+인)', tee: 'Regular', cr: 72.1, sr: 131 },
+    ],
+    '블랙스톤': [
+        { course: '동+서', tee: 'Blue', cr: 75.2, sr: 154 },
+        { course: '동+서', tee: 'White', cr: 73.0, sr: 149 },
+        { course: '서+북', tee: 'Blue', cr: 75.1, sr: 151 },
+        { course: '서+북', tee: 'White', cr: 72.9, sr: 150 },
+        { course: '북+동', tee: 'Blue', cr: 74.9, sr: 149 },
+        { course: '북+동', tee: 'White', cr: 72.5, sr: 146 },
+    ],
+    '에버리스': [
+        { course: '아웃+인', tee: 'Blue', cr: 72.5, sr: 130 },
+        { course: '아웃+인', tee: 'White', cr: 70.5, sr: 126 },
+    ],
+    '롯데스카이힐': [
+        { course: '스카이+힐', tee: 'Black', cr: 75.0, sr: 142 },
+        { course: '스카이+힐', tee: 'Blue', cr: 71.7, sr: 138 },
+        { course: '스카이+힐', tee: 'White', cr: 69.9, sr: 133 },
+    ],
+    '오라': [
+        { course: '동+서', tee: 'BLUE', cr: 74.3, sr: 128 },
+        { course: '동+서', tee: 'WHITE', cr: 71.4, sr: 123 },
+        { course: '남(아웃+인)', tee: 'BLUE', cr: 73.5, sr: 129 },
+        { course: '남(아웃+인)', tee: 'WHITE', cr: 72.0, sr: 126 },
+    ],
+    '봉개': [],
+    '곤지암': [
+        { course: '마운틴+레이크', tee: 'Tournament', cr: 75.3, sr: 143 },
+        { course: '마운틴+레이크', tee: 'Champion', cr: 72.7, sr: 140 },
+        { course: '마운틴+레이크', tee: 'Regular', cr: 70.3, sr: 135 },
+    ],
+    '남촌': [
+        { course: '동+서', tee: '71(GOLD)', cr: 74.5, sr: 142 },
+        { course: '동+서', tee: '67(BLUE)', cr: 72.4, sr: 137 },
+        { course: '동+서', tee: '63(WHITE)', cr: 69.6, sr: 131 },
+    ],
+    '레이크사이드': [
+        { course: '서(아웃+인)', tee: 'CHAMPION', cr: 77.7, sr: 142 },
+        { course: '서(아웃+인)', tee: 'REGULAR', cr: 72.4, sr: 137 },
+        { course: '동(아웃+인)', tee: 'Champion', cr: 78.0, sr: 136 },
+        { course: '동(아웃+인)', tee: 'Regular', cr: 73.3, sr: 131 },
+    ],
+    '남서울': [
+        { course: '아웃+인', tee: 'Blue', cr: 75.8, sr: 142 },
+        { course: '아웃+인', tee: 'White', cr: 73.1, sr: 140 },
+    ],
+    '수원': [
+        { course: 'New(아웃+인)', tee: 'Blue', cr: 74.7, sr: 133 },
+        { course: 'New(아웃+인)', tee: 'White', cr: 72.8, sr: 132 },
+        { course: 'Old(아웃+인)', tee: 'Blue', cr: 73.8, sr: 138 },
+        { course: 'Old(아웃+인)', tee: 'White', cr: 71.7, sr: 134 },
+    ],
+    '안양': [
+        { course: '아웃+인', tee: 'Black', cr: 73.9, sr: 138 },
+        { course: '아웃+인', tee: 'Blue', cr: 72.4, sr: 133 },
+        { course: '아웃+인', tee: 'White', cr: 70.9, sr: 135 },
+    ],
+    '웰링턴': [
+        { course: '그리핀+피닉스', tee: 'WHITE', cr: 72.1, sr: 145 },
+        { course: '피닉스+와이번', tee: 'WHITE', cr: 72.1, sr: 147 },
+        { course: '와이번+그리핀', tee: 'WHITE', cr: 71.8, sr: 148 },
+    ],
+    '태광': [
+        { course: '북+남', tee: 'BLUE', cr: 73.6, sr: 140 },
+        { course: '북+남', tee: 'WHITE', cr: 71.9, sr: 134 },
+        { course: '남+서', tee: 'BLUE', cr: 73.6, sr: 141 },
+        { course: '남+서', tee: 'WHITE', cr: 72.2, sr: 135 },
+    ],
+    '잭니클라우스': [
+        { course: '어반+링스', tee: 'White', cr: 71.8, sr: 135 },
+        { course: '어반+링스', tee: 'Blue', cr: 73.9, sr: 140 },
+    ],
+    '써닝포인트': [
+        { course: '선+포인트', tee: 'White', cr: 71.7, sr: 134 },
+        { course: '선+포인트', tee: 'Blue', cr: 73.6, sr: 138 },
+    ],
+};
 
 const MEMBERS = [
     '곽영주', '권태영', '김대호', '김동영',
@@ -1112,6 +1199,47 @@ function renderRoundDetailBar(round) {
     }
 }
 
+function onVenueInput(val) {
+    const drop = document.getElementById('venueDropdown');
+    if (!val.trim()) { drop.style.display = 'none'; return; }
+    const matches = Object.keys(COURSE_DB).filter(k => k.includes(val));
+    if (matches.length === 0) { drop.style.display = 'none'; return; }
+    drop.innerHTML = matches.map(k =>
+        `<div onclick="selectVenue('${k}')" style="padding:10px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border-light)"
+            onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">${k}</div>`
+    ).join('');
+    drop.style.display = 'block';
+}
+
+function selectVenue(name) {
+    document.getElementById('inputRoundVenue').value = name;
+    document.getElementById('venueDropdown').style.display = 'none';
+    fillCourseRating(name);
+}
+
+function onVenueChange(val) {
+    document.getElementById('venueDropdown').style.display = 'none';
+    fillCourseRating(val);
+}
+
+function fillCourseRating(venue) {
+    const entries = COURSE_DB[venue];
+    if (!entries || entries.length === 0) return;
+    // 현재 코스 입력값과 매칭 시도, 없으면 첫 번째 항목 사용
+    const courseVal = document.getElementById('inputCourse').value.trim();
+    const match = courseVal
+        ? entries.find(e => e.course === courseVal || e.tee === courseVal)
+        : null;
+    const entry = match || entries[0];
+    // 이미 값이 있으면 덮어쓰지 않음
+    if (!document.getElementById('inputCourseRating').value) {
+        document.getElementById('inputCourseRating').value = entry.cr;
+    }
+    if (!document.getElementById('inputSlopeRating').value) {
+        document.getElementById('inputSlopeRating').value = entry.sr;
+    }
+}
+
 function openRoundInfoModal() {
     const round = activeRound();
     document.getElementById('inputRoundDate').value = round.date || '';
@@ -1122,6 +1250,8 @@ function openRoundInfoModal() {
     document.getElementById('inputCourseRating').value = round.course_rating || '';
     document.getElementById('inputSlopeRating').value = round.slope_rating || '';
     document.getElementById('inputNotes').value = round.notes || '';
+    // DB에서 자동완성 (저장된 값 없을 때만)
+    if (!round.course_rating && round.venue) fillCourseRating(round.venue);
     document.getElementById('roundInfoModalOverlay').classList.add('open');
     setTimeout(() => document.getElementById('inputRoundDate').focus(), 100);
 }

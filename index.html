@@ -410,6 +410,7 @@
                         <th>평균</th>
                         <th>최저</th>
                         <th>최고</th>
+                        <th>핸디캡</th>
                         <th>횟수(참석률)</th>
                     </tr>
                 </thead>
@@ -445,6 +446,16 @@
         <div class="form-group">
             <label>그린피</label>
             <input type="number" id="inputGreenfee" placeholder="예: 150000 (공란 가능)" min="0">
+        </div>
+        <div style="display:flex;gap:10px">
+            <div class="form-group" style="flex:1">
+                <label>코스레이팅</label>
+                <input type="number" id="inputCourseRating" placeholder="예: 72.4" step="0.1" min="50" max="80">
+            </div>
+            <div class="form-group" style="flex:1">
+                <label>슬로프레이팅</label>
+                <input type="number" id="inputSlopeRating" placeholder="예: 113" min="55" max="155">
+            </div>
         </div>
         <div class="form-group">
             <label>비고</label>
@@ -1108,6 +1119,8 @@ function openRoundInfoModal() {
     document.getElementById('inputCourse').value = round.course || '';
     document.getElementById('inputTeeTime').value = round.tee_time || '';
     document.getElementById('inputGreenfee').value = round.greenfee || '';
+    document.getElementById('inputCourseRating').value = round.course_rating || '';
+    document.getElementById('inputSlopeRating').value = round.slope_rating || '';
     document.getElementById('inputNotes').value = round.notes || '';
     document.getElementById('roundInfoModalOverlay').classList.add('open');
     setTimeout(() => document.getElementById('inputRoundDate').focus(), 100);
@@ -1126,13 +1139,17 @@ async function saveRoundInfo() {
     const tee_time = document.getElementById('inputTeeTime').value.trim() || null;
     const greenfeeVal = document.getElementById('inputGreenfee').value.trim();
     const greenfee = greenfeeVal ? parseInt(greenfeeVal) : null;
+    const courseRatingVal = document.getElementById('inputCourseRating').value.trim();
+    const course_rating = courseRatingVal ? parseFloat(courseRatingVal) : null;
+    const slopeRatingVal = document.getElementById('inputSlopeRating').value.trim();
+    const slope_rating = slopeRatingVal ? parseInt(slopeRatingVal) : null;
     const notes = document.getElementById('inputNotes').value.trim() || null;
 
-    const { error } = await sb.from('rounds').update({ date, venue, course, tee_time, greenfee, notes }).eq('id', round.id);
+    const { error } = await sb.from('rounds').update({ date, venue, course, tee_time, greenfee, course_rating, slope_rating, notes }).eq('id', round.id);
     if (error) { showToast('저장 실패: ' + error.message); return; }
 
     const idx = rounds.findIndex(r => r.id === round.id);
-    rounds[idx] = { ...rounds[idx], date, venue, course, tee_time, greenfee, notes };
+    rounds[idx] = { ...rounds[idx], date, venue, course, tee_time, greenfee, course_rating, slope_rating, notes };
     sortRounds();
     closeRoundInfoModal();
     render();
@@ -1294,14 +1311,58 @@ function renderStats() {
     renderScoreStats(completedRounds, totalRounds);
 }
 
+function calcHandicap(differentials) {
+    // WHS: 최근 20라운드 기준, 라운드 수에 따라 최상위 n개 평균 × 0.96
+    const d = differentials.slice(-20);
+    const n = d.length;
+    if (n < 3) return null;
+    const table = [
+        null, null, null,
+        { use: 1, adj: -2.0 }, // 3
+        { use: 1, adj: -1.0 }, // 4
+        { use: 1, adj:  0.0 }, // 5
+        { use: 2, adj: -1.0 }, // 6
+        { use: 2, adj:  0.0 }, // 7
+        { use: 2, adj:  0.0 }, // 8
+        { use: 3, adj:  0.0 }, // 9
+        { use: 3, adj:  0.0 }, // 10
+        { use: 3, adj:  0.0 }, // 11
+        { use: 4, adj:  0.0 }, // 12
+        { use: 4, adj:  0.0 }, // 13
+        { use: 4, adj:  0.0 }, // 14
+        { use: 5, adj:  0.0 }, // 15
+        { use: 5, adj:  0.0 }, // 16
+        { use: 6, adj:  0.0 }, // 17
+        { use: 6, adj:  0.0 }, // 18
+        { use: 7, adj:  0.0 }, // 19
+        { use: 8, adj:  0.0 }, // 20
+    ];
+    const { use, adj } = table[Math.min(n, 20)];
+    const sorted = [...d].sort((a, b) => a - b);
+    const best = sorted.slice(0, use);
+    const avg = best.reduce((a, b) => a + b, 0) / use;
+    return Math.round((avg * 0.96 + adj) * 10) / 10;
+}
+
 function renderScoreStats(completedRounds, totalRounds) {
     const memberScoreStats = MEMBERS.map(name => {
         const attCount = completedRounds.filter(r => (attendance[r.id] || new Set()).has(name)).length;
         const attRate = totalRounds > 0 ? attCount / totalRounds : 0;
-        const memberScores = completedRounds
-            .map(r => scores[r.id] && scores[r.id][name])
-            .filter(s => s !== undefined && s !== null);
-        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0, attRate, qualified: attRate >= 0.3 };
+
+        // 타수 + 디퍼런셜 계산 (코스레이팅/슬로프레이팅 있는 라운드만)
+        const memberScores = [];
+        const differentials = [];
+        completedRounds.forEach(r => {
+            const s = scores[r.id] && scores[r.id][name];
+            if (s == null) return;
+            memberScores.push(s);
+            if (r.course_rating && r.slope_rating) {
+                const diff = (s - r.course_rating) * 113 / r.slope_rating;
+                differentials.push(Math.round(diff * 10) / 10);
+            }
+        });
+
+        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0, attRate, handicap: null, qualified: attRate >= 0.3 };
         const avg = memberScores.reduce((a, b) => a + b, 0) / memberScores.length;
         return {
             name,
@@ -1310,6 +1371,7 @@ function renderScoreStats(completedRounds, totalRounds) {
             worst: Math.max(...memberScores),
             count: memberScores.length,
             attRate,
+            handicap: calcHandicap(differentials),
             qualified: attRate >= 0.3
         };
     }).filter(m => m.count > 0);
@@ -1332,17 +1394,18 @@ function renderScoreStats(completedRounds, totalRounds) {
                 <td><span class="score-val">${m.avg}</span></td>
                 <td><span class="score-best">${m.best}</span></td>
                 <td><span class="score-worst">${m.worst}</span></td>
+                <td>${m.handicap != null ? `<span style="font-weight:800;color:#1b4332">${m.handicap}</span>` : `<span class="no-score">-</span>`}</td>
                 <td><span style="color:var(--text-muted);font-size:12px">${m.count}회 (${scoreRate})</span></td>
             </tr>
         `;
     };
 
     if (memberScoreStats.length === 0) {
-        document.getElementById('scoreStatsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9aab9d;padding:16px">저장된 타수 기록이 없습니다</td></tr>`;
+        document.getElementById('scoreStatsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#9aab9d;padding:16px">저장된 타수 기록이 없습니다</td></tr>`;
     } else {
         let html = qualified.map((m, i) => renderRow(m, i, true)).join('');
         if (disqualified.length > 0) {
-            html += `<tr><td colspan="5" style="padding:10px 4px 4px;font-size:11px;font-weight:700;color:#9aab9d;letter-spacing:0.4px;text-transform:uppercase">규정타석 미달 (참석률 30% 미만)</td></tr>`;
+            html += `<tr><td colspan="6" style="padding:10px 4px 4px;font-size:11px;font-weight:700;color:#9aab9d;letter-spacing:0.4px;text-transform:uppercase">규정타석 미달 (참석률 30% 미만)</td></tr>`;
             html += disqualified.map((m, i) => renderRow(m, i, false)).join('');
         }
         document.getElementById('scoreStatsBody').innerHTML = html;

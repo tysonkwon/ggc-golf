@@ -1320,7 +1320,7 @@ function renderScoreStats(completedRounds, totalRounds) {
     const renderRow = (m, i, showRank) => {
         const rankClass = showRank ? (i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n') : 'rank-n';
         const rankLabel = showRank && i < 3 ? i + 1 : '';
-        const rateText = totalRounds > 0 ? Math.round(m.attRate * 100) + '%' : '-';
+        const scoreRate = totalRounds > 0 ? Math.round(m.count / totalRounds * 100) + '%' : '-';
         return `
             <tr>
                 <td>
@@ -1332,7 +1332,7 @@ function renderScoreStats(completedRounds, totalRounds) {
                 <td><span class="score-val">${m.avg}</span></td>
                 <td><span class="score-best">${m.best}</span></td>
                 <td><span class="score-worst">${m.worst}</span></td>
-                <td><span style="color:var(--text-muted);font-size:12px">${m.count}회 (${rateText})</span></td>
+                <td><span style="color:var(--text-muted);font-size:12px">${m.count}회 (${scoreRate})</span></td>
             </tr>
         `;
     };

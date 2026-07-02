@@ -640,11 +640,12 @@ const GROUP_CONFIGS = [
     { cls: 'group-4', label: '🟢 4조' },
 ];
 
-let rounds = [];       // [{id, date, venue, is_custom}]
-let attendance = {};   // {round_id: Set<member_name>}
-let guests = {};       // {round_id: Set<name>}
-let groupResults = {}; // {round_id: [[m1,m2,m3,m4],[...],[...]]}
-let scores = {};       // {round_id: {member_name: score}}
+let rounds = [];        // [{id, date, venue, is_custom}]
+let attendance = {};    // {round_id: Set<member_name>}
+let guests = {};        // {round_id: Set<name>}
+let groupResults = {};  // {round_id: [[m1,m2,m3,m4],[...],[...]]}
+let scores = {};        // {round_id: {member_name: score}}
+let groupRatings = {};  // {round_id: {group_index: {cr, sr}}}
 let activeId = null;
 
 // 날짜 문자열 "6/19(금)" → 정렬용 숫자 (월*100+일)
@@ -681,11 +682,12 @@ function getDefaultRoundId() {
 async function init() {
     showLoading(true);
     try {
-        const [rRes, aRes, gRes, sRes] = await Promise.all([
+        const [rRes, aRes, gRes, sRes, grRes] = await Promise.all([
             sb.from('rounds').select('*').order('created_at'),
             sb.from('attendance').select('*'),
             sb.from('group_results').select('*').order('group_index').order('id'),
             sb.from('scores').select('*'),
+            sb.from('group_ratings').select('*'),
         ]);
 
         if (rRes.error) throw rRes.error;
@@ -718,6 +720,12 @@ async function init() {
         (sRes.data || []).forEach(s => {
             if (!scores[s.round_id]) scores[s.round_id] = {};
             scores[s.round_id][s.member_name] = s.score;
+        });
+
+        groupRatings = {};
+        (grRes.data || []).forEach(gr => {
+            if (!groupRatings[gr.round_id]) groupRatings[gr.round_id] = {};
+            groupRatings[gr.round_id][gr.group_index] = { cr: gr.course_rating, sr: gr.slope_rating };
         });
 
         activeId = getDefaultRoundId();
@@ -979,12 +987,33 @@ function renderGroupResult(groups, sel) {
 function renderScoreInputs(roundId, groups) {
     const roundScores = scores[roundId] || {};
     const hasSaved = Object.keys(roundScores).length > 0;
+    const roundGroupRatings = groupRatings[roundId] || {};
+    // 라운드 기본값 (기존 course_rating/slope_rating)
+    const round = rounds.find(r => r.id === roundId) || {};
 
     document.getElementById('scoreSavedBadge').style.display = hasSaved ? 'inline-flex' : 'none';
 
-    document.getElementById('scoreInputGroups').innerHTML = groups.map((g, i) => `
+    document.getElementById('scoreInputGroups').innerHTML = groups.map((g, i) => {
+        const gr = roundGroupRatings[i] || {};
+        const crVal = gr.cr !== undefined ? gr.cr : (round.course_rating || '');
+        const srVal = gr.sr !== undefined ? gr.sr : (round.slope_rating || '');
+        return `
         <div class="score-group ${GROUP_CONFIGS[i].cls}" style="padding:10px;border-radius:10px;margin-bottom:8px;">
             <div class="score-group-label">${GROUP_CONFIGS[i].label}</div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+                <span style="font-size:11px;color:var(--text-faint);white-space:nowrap">코스레이팅</span>
+                <input type="number" step="0.1" min="50" max="80" placeholder="예: 72.4"
+                    value="${crVal}"
+                    data-group="${i}" data-field="cr"
+                    style="width:72px;padding:5px 8px;border:1.5px solid var(--input-border);border-radius:7px;font-size:12px;text-align:center;background:var(--card-bg);color:var(--text-secondary);outline:none"
+                    onfocus="this.style.borderColor='var(--input-focus)'" onblur="this.style.borderColor='var(--input-border)'">
+                <span style="font-size:11px;color:var(--text-faint);white-space:nowrap">슬로프</span>
+                <input type="number" min="55" max="155" placeholder="예: 113"
+                    value="${srVal}"
+                    data-group="${i}" data-field="sr"
+                    style="width:60px;padding:5px 8px;border:1.5px solid var(--input-border);border-radius:7px;font-size:12px;text-align:center;background:var(--card-bg);color:var(--text-secondary);outline:none"
+                    onfocus="this.style.borderColor='var(--input-focus)'" onblur="this.style.borderColor='var(--input-border)'">
+            </div>
             <div class="score-rows">
                 ${g.map(name => {
                     const val = roundScores[name] !== undefined ? roundScores[name] : '';
@@ -1002,11 +1031,31 @@ function renderScoreInputs(roundId, groups) {
                 }).join('')}
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function saveScores() {
     const round = activeRound();
+
+    // 조별 CR/SR 수집
+    const grInputs = document.querySelectorAll('#scoreInputGroups [data-field]');
+    const grRows = [];
+    const newGroupRatings = {};
+    grInputs.forEach(inp => {
+        const gi = parseInt(inp.dataset.group);
+        if (!newGroupRatings[gi]) newGroupRatings[gi] = {};
+        const v = inp.value.trim();
+        if (inp.dataset.field === 'cr') newGroupRatings[gi].cr = v !== '' ? parseFloat(v) : null;
+        if (inp.dataset.field === 'sr') newGroupRatings[gi].sr = v !== '' ? parseInt(v) : null;
+    });
+    Object.entries(newGroupRatings).forEach(([gi, { cr, sr }]) => {
+        if (cr != null || sr != null) {
+            grRows.push({ round_id: round.id, group_index: parseInt(gi), course_rating: cr, slope_rating: sr });
+        }
+    });
+
+    // 타수 수집
     const inputs = document.querySelectorAll('#scoreInputGroups .score-input');
     const newScores = {};
     inputs.forEach(inp => {
@@ -1017,22 +1066,29 @@ async function saveScores() {
         }
     });
 
-    if (Object.keys(newScores).length === 0) {
+    if (Object.keys(newScores).length === 0 && grRows.length === 0) {
         showToast('입력된 타수가 없습니다');
         return;
     }
 
-    if (!scores[round.id]) scores[round.id] = {};
-    Object.assign(scores[round.id], newScores);
-
-    const rows = Object.entries(newScores).map(([member_name, score]) => ({
-        round_id: round.id, member_name, score
-    }));
-    const { error } = await sb.from('scores').upsert(rows, { onConflict: 'round_id,member_name' });
-    if (error) {
-        showToast('저장 실패: ' + error.message);
-        return;
+    // 저장
+    const ops = [];
+    if (grRows.length > 0) {
+        ops.push(sb.from('group_ratings').upsert(grRows, { onConflict: 'round_id,group_index' }));
+        if (!groupRatings[round.id]) groupRatings[round.id] = {};
+        grRows.forEach(r => { groupRatings[round.id][r.group_index] = { cr: r.course_rating, sr: r.slope_rating }; });
     }
+    if (Object.keys(newScores).length > 0) {
+        if (!scores[round.id]) scores[round.id] = {};
+        Object.assign(scores[round.id], newScores);
+        const scoreRows = Object.entries(newScores).map(([member_name, score]) => ({ round_id: round.id, member_name, score }));
+        ops.push(sb.from('scores').upsert(scoreRows, { onConflict: 'round_id,member_name' }));
+    }
+
+    const results = await Promise.all(ops);
+    const err = results.find(r => r.error);
+    if (err) { showToast('저장 실패: ' + err.error.message); return; }
+
     showToast('결과 저장됨');
     document.getElementById('scoreSavedBadge').style.display = 'inline-flex';
 }
@@ -1479,15 +1535,22 @@ function renderScoreStats(completedRounds, totalRounds) {
         const attCount = completedRounds.filter(r => (attendance[r.id] || new Set()).has(name)).length;
         const attRate = totalRounds > 0 ? attCount / totalRounds : 0;
 
-        // 타수 + 디퍼런셜 계산 (코스레이팅/슬로프레이팅 있는 라운드만)
+        // 타수 + 디퍼런셜 계산
+        // 조별 CR/SR 우선, 없으면 라운드 기본값 사용
         const memberScores = [];
         const differentials = [];
         completedRounds.forEach(r => {
             const s = scores[r.id] && scores[r.id][name];
             if (s == null) return;
             memberScores.push(s);
-            if (r.course_rating && r.slope_rating) {
-                const diff = (s - r.course_rating) * 113 / r.slope_rating;
+            // 이 멤버가 속한 조의 group_index 찾기
+            const grps = groupResults[r.id] || [];
+            const gi = grps.findIndex(g => g.includes(name));
+            const grRating = gi >= 0 && groupRatings[r.id] ? groupRatings[r.id][gi] : null;
+            const cr = grRating?.cr ?? r.course_rating;
+            const sr = grRating?.sr ?? r.slope_rating;
+            if (cr && sr) {
+                const diff = (s - cr) * 113 / sr;
                 differentials.push(Math.round(diff * 10) / 10);
             }
         });

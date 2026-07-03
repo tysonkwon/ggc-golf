@@ -415,7 +415,7 @@
                         <th class="sortable-th" onclick="setScoreSort('best')" id="sort-best">최저</th>
                         <th class="sortable-th" onclick="setScoreSort('worst')" id="sort-worst">최고</th>
                         <th class="sortable-th" onclick="setScoreSort('handicap')" id="sort-handicap">핸디캡</th>
-                        <th class="sortable-th" onclick="setScoreSort('hcpDiff')" id="sort-hcpDiff">작년대비</th>
+                        <th class="sortable-th" onclick="setScoreSort('hcpDiff')" id="sort-hcpDiff">작년평균대비</th>
                         <th>횟수(참석률)</th>
                     </tr>
                 </thead>
@@ -627,24 +627,24 @@ const MEMBERS = [
     '장노륜', '장성집', '조주영', '홍상현'
 ];
 
-// 2025년 작년 핸디캡 (평균타수 - 72)
-const LAST_YEAR_HANDICAP = {
-    '곽영주':  9.9,
-    '권태영': 11.3,
-    '김대호': 11.4,
-    '김동영': 13.5,
-    '김동유':  8.5,
-    '김성래':  8.7,
-    '김정국': 10.4,
-    '김정탁': 14.8,
-    '신용훈': 11.9,
-    '양성민': 25.6,
-    '이준헌': 17.3,
-    '임재용': 18.5,
-    '장노륜': 21.3,
-    '장성집': 10.7,
-    '조주영': 17.4,
-    '홍상현': 24.3,
+// 2025년 평균타수
+const LAST_YEAR_AVG = {
+    '곽영주': 81.9,
+    '권태영': 83.3,
+    '김대호': 83.4,
+    '김동영': 85.5,
+    '김동유': 80.5,
+    '김성래': 80.7,
+    '김정국': 82.4,
+    '김정탁': 86.8,
+    '신용훈': 83.9,
+    '양성민': 97.6,
+    '이준헌': 89.3,
+    '임재용': 90.5,
+    '장노륜': 93.3,
+    '장성집': 82.7,
+    '조주영': 89.4,
+    '홍상현': 96.3,
 };
 
 function getMax(r) { return (r && r.max_players) || 12; }
@@ -1645,23 +1645,24 @@ function renderScoreStats(completedRounds, totalRounds) {
             }
         });
 
-        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0, attRate, handicap: null, hcpDiff: null, qualified: attRate >= 0.3 };
+        if (memberScores.length === 0) return { name, avg: null, best: null, worst: null, count: 0, attRate, handicap: null, hcpDiff: null, qualified: attRate >= 0.4 };
         const avg = memberScores.reduce((a, b) => a + b, 0) / memberScores.length;
+        const avgRounded = Math.round(avg * 10) / 10;
         const handicap = calcHandicap(differentials);
-        const lastYear = LAST_YEAR_HANDICAP[name] ?? null;
-        const hcpDiff = (handicap != null && lastYear != null)
-            ? Math.round((handicap - lastYear) * 10) / 10
+        const lastYearAvg = LAST_YEAR_AVG[name] ?? null;
+        const hcpDiff = (lastYearAvg != null)
+            ? Math.round((avgRounded - lastYearAvg) * 10) / 10
             : null;
         return {
             name,
-            avg: Math.round(avg * 10) / 10,
+            avg: avgRounded,
             best: Math.min(...memberScores),
             worst: Math.max(...memberScores),
             count: memberScores.length,
             attRate,
             handicap,
             hcpDiff,
-            qualified: attRate >= 0.3
+            qualified: attRate >= 0.4
         };
     }).filter(m => m.count > 0);
 
@@ -1679,7 +1680,7 @@ function renderScoreStats(completedRounds, totalRounds) {
     const disqualified = memberScoreStats.filter(m => !m.qualified).sort(sortFn);
 
     // 헤더 화살표 업데이트
-    const sortLabels = { avg: '평균', best: '최저', worst: '최고', handicap: '핸디캡', hcpDiff: '작년대비' };
+    const sortLabels = { avg: '평균', best: '최저', worst: '최고', handicap: '핸디캡', hcpDiff: '작년평균대비' };
     ['avg', 'best', 'worst', 'handicap', 'hcpDiff'].forEach(key => {
         const th = document.getElementById('sort-' + key);
         if (!th) return;
@@ -1721,7 +1722,7 @@ function renderScoreStats(completedRounds, totalRounds) {
     } else {
         let html = qualified.map((m, i) => renderRow(m, i, true)).join('');
         if (disqualified.length > 0) {
-            html += `<tr><td colspan="7" style="padding:10px 4px 4px;font-size:11px;font-weight:700;color:#9aab9d;letter-spacing:0.4px;text-transform:uppercase">규정타석 미달 (참석률 30% 미만)</td></tr>`;
+            html += `<tr><td colspan="7" style="padding:10px 4px 4px;font-size:11px;font-weight:700;color:#9aab9d;letter-spacing:0.4px;text-transform:uppercase">규정타석 미달 (참석률 40% 미만)</td></tr>`;
             html += disqualified.map((m, i) => renderRow(m, i, false)).join('');
         }
         document.getElementById('scoreStatsBody').innerHTML = html;

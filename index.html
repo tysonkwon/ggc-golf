@@ -1582,7 +1582,8 @@ function calcHandicap(differentials) {
     const sorted = [...d].sort((a, b) => a - b);
     const best = sorted.slice(0, use);
     const avg = best.reduce((a, b) => a + b, 0) / use;
-    return Math.round((avg * 0.96 + adj) * 10) / 10;
+    // WHS: 소수점 첫째 자리로 내림(절삭), 반올림 아님
+    return Math.floor((avg * 0.96 + adj) * 10) / 10;
 }
 
 let scoreSort = { key: 'avg', asc: true };

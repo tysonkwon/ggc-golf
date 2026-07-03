@@ -414,9 +414,9 @@
                         <th class="sortable-th" onclick="setScoreSort('avg')" id="sort-avg">평균</th>
                         <th class="sortable-th" onclick="setScoreSort('best')" id="sort-best">최저</th>
                         <th class="sortable-th" onclick="setScoreSort('worst')" id="sort-worst">최고</th>
-                        <th class="sortable-th" onclick="setScoreSort('handicap')" id="sort-handicap">공인핸디캡</th>
-                        <th class="sortable-th" onclick="setScoreSort('hcpDiff')" id="sort-hcpDiff">작년평균대비</th>
-                        <th>횟수(참석률)</th>
+                        <th class="sortable-th" onclick="setScoreSort('handicap')" id="sort-handicap">공인핸디</th>
+                        <th class="sortable-th" onclick="setScoreSort('hcpDiff')" id="sort-hcpDiff">작년대비</th>
+                        <th>참석</th>
                     </tr>
                 </thead>
                 <tbody id="scoreStatsBody"></tbody>
@@ -1680,7 +1680,7 @@ function renderScoreStats(completedRounds, totalRounds) {
     const disqualified = memberScoreStats.filter(m => !m.qualified).sort(sortFn);
 
     // 헤더 화살표 업데이트
-    const sortLabels = { avg: '평균', best: '최저', worst: '최고', handicap: '공인핸디캡', hcpDiff: '작년평균대비' };
+    const sortLabels = { avg: '평균', best: '최저', worst: '최고', handicap: '공인핸디', hcpDiff: '작년대비' };
     ['avg', 'best', 'worst', 'handicap', 'hcpDiff'].forEach(key => {
         const th = document.getElementById('sort-' + key);
         if (!th) return;

@@ -267,6 +267,10 @@
         .score-stats-table { width: 100%; border-collapse: collapse; }
         .score-stats-table th { font-size: 12px; font-weight: 700; color: var(--text-faint); text-align: center; padding: 6px 4px 10px; }
         .score-stats-table th:first-child { text-align: left; }
+        .sortable-th { cursor: pointer; user-select: none; transition: color 0.15s; }
+        .sortable-th:hover { color: var(--text-secondary); }
+        .sortable-th.sort-active { color: #1b4332; }
+        .sort-arrow { font-size: 10px; margin-left: 2px; }
         .score-stats-table td { padding: 10px 4px; border-top: 1px solid var(--border-light); font-size: 14px; text-align: center; vertical-align: middle; }
         .score-stats-table td:first-child { font-weight: 700; color: var(--text-primary); text-align: left; }
         .score-stats-table tr:hover td { background: var(--stats-row-hover); }
@@ -407,10 +411,10 @@
                 <thead>
                     <tr>
                         <th>이름</th>
-                        <th>평균</th>
-                        <th>최저</th>
-                        <th>최고</th>
-                        <th>핸디캡</th>
+                        <th class="sortable-th" onclick="setScoreSort('avg')" id="sort-avg">평균</th>
+                        <th class="sortable-th" onclick="setScoreSort('best')" id="sort-best">최저</th>
+                        <th class="sortable-th" onclick="setScoreSort('worst')" id="sort-worst">최고</th>
+                        <th class="sortable-th" onclick="setScoreSort('handicap')" id="sort-handicap">핸디캡</th>
                         <th>횟수(참석률)</th>
                     </tr>
                 </thead>
@@ -1581,6 +1585,19 @@ function calcHandicap(differentials) {
     return Math.round((avg * 0.96 + adj) * 10) / 10;
 }
 
+let scoreSort = { key: 'avg', asc: true };
+
+function setScoreSort(key) {
+    if (scoreSort.key === key) {
+        scoreSort.asc = !scoreSort.asc;
+    } else {
+        scoreSort.key = key;
+        scoreSort.asc = true;
+    }
+    // 통계 탭이 열려 있으면 다시 렌더
+    if (document.getElementById('navStats').classList.contains('active')) renderStats();
+}
+
 function renderScoreStats(completedRounds, totalRounds) {
     const memberScoreStats = MEMBERS.map(name => {
         const attCount = completedRounds.filter(r => (attendance[r.id] || new Set()).has(name)).length;
@@ -1620,8 +1637,28 @@ function renderScoreStats(completedRounds, totalRounds) {
         };
     }).filter(m => m.count > 0);
 
-    const qualified = memberScoreStats.filter(m => m.qualified).sort((a, b) => a.avg - b.avg);
-    const disqualified = memberScoreStats.filter(m => !m.qualified).sort((a, b) => a.avg - b.avg);
+    // 정렬 함수
+    const sortFn = (a, b) => {
+        const key = scoreSort.key;
+        const av = a[key], bv = b[key];
+        // null은 항상 뒤로
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return scoreSort.asc ? av - bv : bv - av;
+    };
+    const qualified = memberScoreStats.filter(m => m.qualified).sort(sortFn);
+    const disqualified = memberScoreStats.filter(m => !m.qualified).sort(sortFn);
+
+    // 헤더 화살표 업데이트
+    ['avg', 'best', 'worst', 'handicap'].forEach(key => {
+        const th = document.getElementById('sort-' + key);
+        if (!th) return;
+        const isActive = scoreSort.key === key;
+        th.classList.toggle('sort-active', isActive);
+        const arrow = isActive ? `<span class="sort-arrow">${scoreSort.asc ? '▲' : '▼'}</span>` : `<span class="sort-arrow" style="opacity:0.25">▲</span>`;
+        th.innerHTML = { avg: '평균', best: '최저', worst: '최고', handicap: '핸디캡' }[key] + arrow;
+    });
 
     const renderRow = (m, i, showRank) => {
         const rankClass = showRank ? (i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n') : 'rank-n';
@@ -1697,4 +1734,3 @@ init();
 </script>
 </body>
 </html>
-

@@ -1101,8 +1101,8 @@ function renderScoreInputs(roundId, groups) {
                         <div class="score-row">
                             <span class="s-name">${name}</span>
                             <input class="score-input${val !== '' ? ' has-value' : ''}"
-                                   type="number" min="50" max="150"
-                                   placeholder="타수"
+                                   type="number" min="-20" max="150"
+                                   placeholder="타수/오버파"
                                    value="${val}"
                                    data-name="${name}"
                                    oninput="this.classList.toggle('has-value', this.value !== '')">
@@ -1141,7 +1141,9 @@ async function saveScores() {
     inputs.forEach(inp => {
         const val = inp.value.trim();
         if (val !== '') {
-            const n = parseInt(val);
+            let n = parseInt(val);
+            // 40 이하로 입력하면 오버파(언더파)로 간주해 par 72 기준 스코어로 치환 (예: 3→75, -2→70)
+            if (!isNaN(n) && n <= 40) n = n + 72;
             if (!isNaN(n) && n >= 50 && n <= 200) newScores[inp.dataset.name] = n;
         }
     });

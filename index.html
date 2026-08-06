@@ -702,6 +702,38 @@ function getDefaultRoundId() {
     return upcoming ? upcoming.id : rounds[rounds.length - 1].id;
 }
 
+// --- 종료된 라운드 편집 보호 ---
+function currentDateOrder() {
+    const n = new Date();
+    return (n.getMonth() + 1) * 100 + n.getDate();
+}
+// 종료된 라운드 = 날짜가 오늘 포함 이전
+function isRoundEnded(round) {
+    if (!round || !round.date) return false;
+    return parseDateOrder(round.date) <= currentDateOrder();
+}
+async function sha256hex(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// 종료된 라운드 수정/삭제 전 관리자 비밀번호 확인. 통과 시 세션 동안 재확인 생략.
+async function ensureRoundEditAllowed(round) {
+    if (!isRoundEnded(round)) return true;                 // 예정 라운드는 자유롭게 수정
+    if (sessionStorage.getItem('ggcEditUnlocked') === '1') return true;
+
+    // DB에서 관리자 비번 해시 조회 (평문은 저장하지 않음)
+    const { data, error } = await sb.from('app_config')
+        .select('value').eq('key', 'edit_password_hash').maybeSingle();
+    if (error) { showToast('비밀번호 확인 실패: ' + error.message); return false; }
+    if (!data || !data.value) { showToast('관리자 비밀번호가 설정되지 않았습니다'); return false; }
+
+    const input = prompt('종료된 라운드입니다.\n수정/삭제하려면 관리자 비밀번호를 입력하세요:');
+    if (input === null) return false;                      // 취소
+    if ((await sha256hex(input)) !== data.value) { showToast('비밀번호가 일치하지 않습니다'); return false; }
+    sessionStorage.setItem('ggcEditUnlocked', '1');
+    return true;
+}
+
 // --- Init ---
 async function init() {
     showLoading(true);
@@ -1396,6 +1428,7 @@ function closeRoundInfoModal() {
 
 async function saveRoundInfo() {
     const round = activeRound();
+    if (!await ensureRoundEditAllowed(round)) return;
     const date = document.getElementById('inputRoundDate').value.trim();
     const venue = document.getElementById('inputRoundVenue').value.trim();
     if (!date || !venue) { showToast('날짜와 골프장은 필수입니다'); return; }
@@ -1474,6 +1507,7 @@ async function addCustomRound() {
 
 async function deleteCurrentRound() {
     const round = activeRound();
+    if (!await ensureRoundEditAllowed(round)) return;
     if (!confirm(`"${round.date} ${round.venue}" 라운드를 삭제할까요?\n참석 정보와 조편성 결과도 함께 삭제됩니다.`)) return;
 
     await Promise.all([

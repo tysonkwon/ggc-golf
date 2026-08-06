@@ -1515,12 +1515,15 @@ async function deleteCurrentRound() {
         sb.from('attendance').delete().eq('round_id', round.id),
         sb.from('group_results').delete().eq('round_id', round.id),
         sb.from('scores').delete().eq('round_id', round.id),
+        sb.from('group_ratings').delete().eq('round_id', round.id),
     ]);
 
     rounds = rounds.filter(r => r.id !== round.id);
     delete attendance[round.id];
+    delete guests[round.id];
     delete groupResults[round.id];
     delete scores[round.id];
+    delete groupRatings[round.id];
     activeId = rounds[0]?.id || null;
     render();
     showToast('라운드가 삭제되었습니다');

@@ -332,6 +332,7 @@
             <div class="round-info-badge" id="roundInfoBadge">
                 <span id="roundDateLabel"></span>
                 <span class="venue-tag" id="roundVenueLabel"></span>
+                <span id="roundOfficialLabel"></span>
             </div>
         </div>
         <div class="round-detail-bar" id="roundDetailBar"></div>
@@ -392,6 +393,10 @@
     <div id="pageStats" style="display:none">
         <div class="card">
             <div class="card-title">📊 참석 통계</div>
+            <div id="statsScopeToggle" style="display:flex;gap:0;margin-bottom:14px;border:1.5px solid var(--input-border);border-radius:10px;overflow:hidden;width:fit-content">
+                <button type="button" id="scopeOfficial" onclick="setStatsScope('official')" style="padding:7px 16px;border:none;background:#2e7d4f;color:#fff;font-size:13px;font-weight:700;cursor:pointer">공식만</button>
+                <button type="button" id="scopeAll" onclick="setStatsScope('all')" style="padding:7px 16px;border:none;background:var(--card-bg);color:var(--text-faint);font-size:13px;font-weight:700;cursor:pointer">전체</button>
+            </div>
             <div class="stats-summary" id="statsSummary"></div>
             <table class="stats-table" id="statsTable">
                 <thead>
@@ -470,6 +475,12 @@
                 style="width:100%;padding:11px 14px;border:2px solid var(--input-border);border-radius:10px;font-size:14px;outline:none;transition:border-color 0.15s;resize:vertical;min-height:80px;font-family:inherit;background:var(--card-bg);color:var(--text-secondary);"
                 onfocus="this.style.borderColor='var(--input-focus)'" onblur="this.style.borderColor='var(--input-border)'"></textarea>
         </div>
+        <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="inputRoundIsOfficial" checked style="width:auto;margin:0">
+                <span>공식 모임</span>
+            </label>
+        </div>
         <div class="modal-actions">
             <button class="btn btn-secondary" style="flex:1" onclick="closeRoundInfoModal()">취소</button>
             <button class="btn btn-primary" style="flex:2" onclick="saveRoundInfo()">저장</button>
@@ -521,6 +532,12 @@
         <div class="form-group">
             <label>참가 정원</label>
             <input type="number" id="inputMaxPlayers" placeholder="12" min="1" max="16" value="12">
+        </div>
+        <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="inputIsOfficial" checked style="width:auto;margin:0">
+                <span>공식 모임</span>
+            </label>
         </div>
         <div class="modal-actions">
             <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">취소</button>
@@ -795,6 +812,15 @@ async function init() {
 
 function activeRound() { return rounds.find(r => r.id === activeId); }
 
+// 공식/비공식 배지 HTML
+function officialBadge(round) {
+    const isOfficial = round.is_official !== false;
+    const style = 'display:inline-block;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:700;margin-left:4px;';
+    return isOfficial
+        ? `<span style="${style}background:#e3f3e6;color:#2e7d4f">공식</span>`
+        : `<span style="${style}background:#eceff1;color:#78909c">비공식</span>`;
+}
+
 // --- Render ---
 function render() {
     renderTabs();
@@ -804,6 +830,7 @@ function render() {
 
     document.getElementById('roundDateLabel').textContent = round.date;
     document.getElementById('roundVenueLabel').textContent = round.venue;
+    document.getElementById('roundOfficialLabel').innerHTML = officialBadge(round);
     renderRoundDetailBar(round);
 
     const MAX = getMax(round);
@@ -878,6 +905,7 @@ function renderTabs() {
                 ${isFull && !isActive ? `<div class="tab-dot"></div>` : ''}
                 <div class="tab-date">${r.date}</div>
                 <div class="tab-venue">${r.venue}</div>
+                ${r.is_official === false ? `<div style="font-size:9px;margin-top:1px;color:#90a4ae;font-weight:700">비공식</div>` : ''}
                 ${hasAny ? `<div style="font-size:10px;margin-top:2px;opacity:0.8">${count}/${mx}</div>` : ''}
             </div>
         `;
@@ -1416,6 +1444,7 @@ function openRoundInfoModal() {
     document.getElementById('inputCourseRating').value = round.course_rating || '';
     document.getElementById('inputSlopeRating').value = round.slope_rating || '';
     document.getElementById('inputNotes').value = round.notes || '';
+    document.getElementById('inputRoundIsOfficial').checked = round.is_official !== false;
     // DB에서 자동완성 (저장된 값 없을 때만)
     if (!round.course_rating && round.venue) fillCourseRating(round.venue);
     document.getElementById('roundInfoModalOverlay').classList.add('open');
@@ -1441,12 +1470,13 @@ async function saveRoundInfo() {
     const slopeRatingVal = document.getElementById('inputSlopeRating').value.trim();
     const slope_rating = slopeRatingVal ? parseInt(slopeRatingVal) : null;
     const notes = document.getElementById('inputNotes').value.trim() || null;
+    const is_official = document.getElementById('inputRoundIsOfficial').checked;
 
-    const { error } = await sb.from('rounds').update({ date, venue, course, tee_time, greenfee, course_rating, slope_rating, notes }).eq('id', round.id);
+    const { error } = await sb.from('rounds').update({ date, venue, course, tee_time, greenfee, course_rating, slope_rating, notes, is_official }).eq('id', round.id);
     if (error) { showToast('저장 실패: ' + error.message); return; }
 
     const idx = rounds.findIndex(r => r.id === round.id);
-    rounds[idx] = { ...rounds[idx], date, venue, course, tee_time, greenfee, course_rating, slope_rating, notes };
+    rounds[idx] = { ...rounds[idx], date, venue, course, tee_time, greenfee, course_rating, slope_rating, notes, is_official };
     sortRounds();
     closeRoundInfoModal();
     render();
@@ -1475,6 +1505,7 @@ function openModal() {
     document.getElementById('inputDate').value = '';
     document.getElementById('inputVenue').value = '';
     document.getElementById('inputMaxPlayers').value = '12';
+    document.getElementById('inputIsOfficial').checked = true;
     document.getElementById('modalOverlay').classList.add('open');
     setTimeout(() => document.getElementById('inputDate').focus(), 100);
 }
@@ -1486,12 +1517,13 @@ async function addCustomRound() {
     if (!date || !venue) { alert('날짜와 골프장을 모두 입력해주세요.'); return; }
     const maxVal = parseInt(document.getElementById('inputMaxPlayers').value) || 12;
     const max_players = Math.min(Math.max(maxVal, 1), 16);
+    const is_official = document.getElementById('inputIsOfficial').checked;
 
     const id = 'custom_' + Date.now();
-    const { error } = await sb.from('rounds').insert({ id, date, venue, is_custom: true, max_players });
+    const { error } = await sb.from('rounds').insert({ id, date, venue, is_custom: true, max_players, is_official });
     if (error) { alert('저장 실패: ' + error.message); return; }
 
-    rounds.push({ id, date, venue, is_custom: true, max_players });
+    rounds.push({ id, date, venue, is_custom: true, max_players, is_official });
     sortRounds();
     attendance[id] = new Set();
     guests[id] = new Set();
@@ -1550,13 +1582,24 @@ function switchPage(page) {
 }
 
 // --- Stats ---
+let statsScope = 'official'; // 'official' = 공식만, 'all' = 전체
+
+function setStatsScope(scope) {
+    statsScope = scope;
+    const on = 'background:#2e7d4f;color:#fff', off = 'background:var(--card-bg);color:var(--text-faint)';
+    document.getElementById('scopeOfficial').style.cssText = `padding:7px 16px;border:none;font-size:13px;font-weight:700;cursor:pointer;${scope==='official'?on:off}`;
+    document.getElementById('scopeAll').style.cssText = `padding:7px 16px;border:none;font-size:13px;font-weight:700;cursor:pointer;${scope==='all'?on:off}`;
+    renderStats();
+}
+
 function renderStats() {
     const todayOrder = parseDateOrder(
         (() => { const n = new Date(); return `${n.getMonth()+1}/${n.getDate()}`; })()
     );
 
-    // 조편성 완료 + 오늘 이하 라운드만
+    // 조편성 완료 + 오늘 이하 라운드만 (+ 공식만 모드면 비공식 제외)
     const completedRounds = rounds.filter(r => {
+        if (statsScope === 'official' && r.is_official === false) return false;
         const g = groupResults[r.id];
         return g && g.some(grp => grp.length > 0) && parseDateOrder(r.date) <= todayOrder;
     });

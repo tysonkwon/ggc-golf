@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>GGC 하반기 대구 공식대회</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 골프 스코어카드 — 좁은 단일 컬럼, 날짜별 카드, 두 팀 색 대비 */
+:root{
+  --bg:#F2F4EF; --paper:#FFFFFF; --fg:#18231C; --muted:#5E6B62; --line:#D9DED6;
+  --green:#1E5B3A; --green-soft:#E3EEE6;
+  --blue:#1F55A6; --blue-soft:#E4ECF8;
+  --red:#B8372B; --red-soft:#F8E6E3;
+  --gold:#A57A12; --gold-soft:#F6EFD9;
+  --f-display:"Black Han Sans","IBM Plex Sans KR",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111713; --paper:#18201A; --fg:#E6ECE7; --muted:#9AA79E; --line:#2B362E;
+  --green:#6FC294; --green-soft:#1D2F24;
+  --blue:#7FA8F0; --blue-soft:#1B2638;
+  --red:#F0897D; --red-soft:#3A1F1C;
+  --gold:#E3B94F; --gold-soft:#332A14; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111713; --paper:#18201A; --fg:#E6ECE7; --muted:#9AA79E; --line:#2B362E;
+  --green:#6FC294; --green-soft:#1D2F24;
+  --blue:#7FA8F0; --blue-soft:#1B2638;
+  --red:#F0897D; --red-soft:#3A1F1C;
+  --gold:#E3B94F; --gold-soft:#332A14; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:760px;margin:0 auto;padding-block:32px 64px;display:flex;flex-direction:column;gap:40px}
+h1,h2{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;letter-spacing:.01em}
+h2{font-size:24px;display:flex;align-items:baseline;gap:10px}
+h2 small{font-family:var(--f-body);font-size:13px;color:var(--muted);font-weight:500}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+section{display:flex;flex-direction:column;gap:16px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:14px;padding-bottom:28px;border-bottom:2px solid var(--fg)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);font-weight:700}
+.hero h1{font-size:clamp(34px,7vw,52px);line-height:1.1}
+.hero p{margin:0;color:var(--muted);max-width:60ch}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:6px}
+.facts div{background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.facts b{font-family:var(--f-display);font-weight:400;font-size:22px}
+.facts span{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.facts{grid-template-columns:repeat(2,1fr)}}
+
+/* teams */
+.teams{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.team{background:var(--paper);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;border-top:6px solid var(--c)}
+.team.b{--c:var(--blue);--cs:var(--blue-soft)} .team.r{--c:var(--red);--cs:var(--red-soft)}
+.team header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.team h3{font-family:var(--f-display);font-weight:400;font-size:22px;margin:0;color:var(--c)}
+.team .idx{font-size:12px;color:var(--muted);text-align:right}
+.team .idx b{display:block;font-family:var(--f-mono);font-size:18px;color:var(--fg)}
+.team ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.team li{padding:6px 10px;border-radius:6px;background:var(--cs);font-weight:500}
+.team li.cap{grid-column:1/-1;background:var(--c);color:var(--paper);display:flex;justify-content:space-between}
+.team li.cap em{font-style:normal;font-size:12px;opacity:.85}
+.vs{align-self:center;font-family:var(--f-display);font-size:22px;color:var(--muted)}
+@media (max-width:600px){.teams{grid-template-columns:1fr}.vs{justify-self:center}}
+
+/* days */
+.day{background:var(--paper);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.day-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;background:var(--green);color:var(--paper);flex-wrap:wrap}
+.day-head h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:20px}
+.day-head .course{font-size:13px;font-weight:700;background:var(--paper);color:var(--green);padding:3px 10px;border-radius:999px}
+.tl{list-style:none;margin:0;padding:6px 0}
+.tl li{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px 18px;border-bottom:1px dashed var(--line)}
+.tl li:last-child{border-bottom:0}
+.tl time{font-family:var(--f-mono);font-weight:600;color:var(--green);font-size:14px;padding-top:1px}
+.tl .what{min-width:0}
+.tl .what b{font-weight:700}
+.tl .what .sub{display:block;font-size:13px;color:var(--muted)}
+.tl li.golf{background:var(--green-soft)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:6px;vertical-align:2px}
+.tag.warn{background:var(--gold-soft);color:var(--gold)}
+.tag.tbd{background:var(--line);color:var(--muted)}
+
+/* pairing table */
+.scroll{overflow-x:auto;padding:0 18px 16px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:460px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:500}
+td.b{color:var(--blue);font-weight:700} td.r{color:var(--red);font-weight:700}
+td.vs2{color:var(--muted);text-align:center;font-size:12px}
+.tees{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 16px}
+.tl .tees{padding:8px 0 2px;gap:6px}
+.tl .tee{background:var(--paper)}
+.groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+@media (max-width:560px){.groups{grid-template-columns:1fr}}
+.grp{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.grp .t{font-family:var(--f-mono);font-size:13px;font-weight:600}
+.grp .t span{font-family:var(--f-body);font-weight:500;color:var(--muted);margin-right:6px}
+.grp .n{font-size:14px;font-weight:700;display:flex;flex-wrap:wrap;gap:2px 10px}
+.grp .n .b{color:var(--blue)} .grp .n .r{color:var(--red)}
+.tee{font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.tee span{font-family:var(--f-body);color:var(--muted);margin-right:6px}
+.note{font-size:13px;color:var(--muted);padding:0 18px 14px;margin:0}
+
+/* awards */
+.awards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (max-width:560px){.awards{grid-template-columns:1fr}}
+.award{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.award.top{grid-column:1/-1;background:var(--gold-soft);border-color:var(--gold)}
+.award .k{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.award h4{margin:0;font-size:16px}
+.award .cnt{font-size:12px;color:var(--muted);white-space:nowrap}
+.award .prize{font-weight:700;color:var(--green)}
+.award.top .prize{color:var(--gold)}
+.award p{margin:0;font-size:13px;color:var(--muted)}
+
+/* sponsors */
+.sp{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sp table{min-width:420px}
+.sp td:first-child{font-weight:700}
+.sp tfoot td{font-weight:700;border-bottom:0;background:var(--green-soft)}
+
+.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.rules li::marker{color:var(--green)}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">GGC Official Tournament · 2026 하반기</div>
+  <h1>GGC 하반기 공식대회<br>대구 원정 2박 3일</h1>
+  <p>김성래 단장과 김정국 단장이 이끄는 두 팀이 김천·대구에서 세 번의 라운드로 맞붙습니다. 족구와 막창은 덤입니다.</p>
+  <div class="facts">
+    <div><b class="mono">10.30–11.01</b><span>금 ~ 일</span></div>
+    <div><b>3 라운드</b><span>포도 · 해내다 · 대구CC</span></div>
+    <div><b>16명</b><span>4개 조</span></div>
+    <div><b>2팀</b><span>팀 대항전</span></div>
+  </div>
+</header>
+
+<section>
+  <h2>팀 구성 <small>★ 단장</small></h2>
+  <div class="teams">
+    <article class="team b">
+      <header><h3>TEAM 김성래</h3><div class="idx">팀 합산<b>684.3</b></div></header>
+      <ol>
+        <li class="cap">★ 김성래 <em>단장</em></li>
+        <li>김동유</li><li>곽영주</li><li>김대호</li><li>조주영</li><li>임재용</li><li>이준헌</li><li>양성민</li>
+      </ol>
+    </article>
+    <div class="vs">VS</div>
+    <article class="team r">
+      <header><h3>TEAM 김정국</h3><div class="idx">팀 합산<b>691.1</b></div></header>
+      <ol>
+        <li class="cap">★ 김정국 <em>단장</em></li>
+        <li>장성집</li><li>김동영</li><li>김정탁</li><li>신용훈</li><li>권태영</li><li>장노륜</li><li>홍상현</li>
+      </ol>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2>일정</h2>
+
+  <article class="day">
+    <div class="day-head"><h3>DAY 1 · 10.30 (금)</h3><span class="course">김천 포도CC</span></div>
+    <ul class="tl">
+      <li><time>04:00</time><div class="what"><b>집결 후 골프장 이동</b><span class="sub">집결 장소 <span class="tag tbd">추후 공지</span></span></div></li>
+      <li class="golf"><time>08:12</time><div class="what"><b>R1 · 포도컨트리클럽</b><span class="sub">샤인 · 포도 코스 4팀 티오프 (~13:30)</span><span class="sub">골프장 문의 054-420-0200 · 예약자 김대호</span>
+        <div class="groups">
+          <div class="grp"><div class="t"><span>샤인</span>08:12</div><div class="n"><span class="b">김성래 · 양성민</span><span class="r">장성집 · 장노륜</span></div></div>
+          <div class="grp"><div class="t"><span>샤인</span>08:19</div><div class="n"><span class="b">김동유 · 이준헌</span><span class="r">김정국 · 홍상현</span></div></div>
+          <div class="grp"><div class="t"><span>포도</span>08:12</div><div class="n"><span class="b">곽영주 · 임재용</span><span class="r">신용훈 · 김정탁</span></div></div>
+          <div class="grp"><div class="t"><span>포도</span>08:19</div><div class="n"><span class="b">김대호 · 조주영</span><span class="r">김동영 · 권태영</span></div></div>
+        </div></div></li>
+      <li><time>13:30</time><div class="what"><b>대구로 이동</b></div></li>
+      <li><time>15:00</time><div class="what"><b>호텔 체크인 · 휴식</b><span class="sub">숙소 <span class="tag tbd">추후 공지</span></span></div></li>
+      <li><time>16:50</time><div class="what"><b>저녁 · 제일숯불생막창</b><span class="tag warn">예약 불가 · 오픈런</span><span class="sub">시간 엄수 부탁드립니다</span></div></li>
+    </ul>
+  </article>
+
+  <article class="day">
+    <div class="day-head"><h3>DAY 2 · 10.31 (토)</h3><span class="course">해내다CC</span></div>
+    <ul class="tl">
+      <li><time>08:15</time><div class="what"><b>아침 · 일품돼지국밥</b></div></li>
+      <li><time>09:30</time><div class="what"><b>족구 한 판</b><span class="sub">고산구민운동장 (~11:30) · 운동화 챙겨오세요</span></div></li>
+      <li><time>11:30</time><div class="what"><b>골프장 이동</b></div></li>
+      <li class="golf"><time>12:36</time><div class="what"><b>R2 · 해내다CC</b><span class="sub">스카이→마운틴 · 마운틴→밸리 4팀</span><span class="sub">예약자명 대경회 · 조 편성 <span class="tag tbd">추후 공지</span></span>
+        <div class="tees"><div class="tee"><span>스카이</span>12:36</div><div class="tee"><span>스카이</span>12:43</div><div class="tee"><span>마운틴</span>12:36</div><div class="tee"><span>마운틴</span>12:43</div></div></div></li>
+      <li><time>19:00</time><div class="what"><b>저녁 · 미가생고기</b><span class="tag warn">예약금 16만원 선납</span></div></li>
+    </ul>
+  </article>
+
+  <article class="day">
+    <div class="day-head"><h3>DAY 3 · 11.01 (일)</h3><span class="course">대구CC</span></div>
+    <ul class="tl">
+      <li class="golf"><time>07:06</time><div class="what"><b>R3 · 대구컨트리클럽</b><span class="sub">중코스 4팀 연속 티오프</span><span class="sub">조 편성 <span class="tag tbd">추후 공지</span></span>
+        <div class="tees"><div class="tee"><span>중</span>07:06</div><div class="tee"><span>중</span>07:13</div><div class="tee"><span>중</span>07:20</div><div class="tee"><span>중</span>07:27</div></div></div></li>
+      <li><time>12:00</time><div class="what"><b>점심 · 클럽하우스</b><span class="sub">시상식 진행</span></div></li>
+      <li><time>13:00</time><div class="what"><b>서울 복귀</b></div></li>
+    </ul>
+  </article>
+</section>
+
+<section>
+  <h2>시상 <small>(예시)</small></h2>
+  <div class="awards">
+    <div class="award top">
+      <div class="k"><h4>🏆 우승팀</h4><span class="cnt">8명</span></div>
+      <div class="prize">상품권 1매씩 (총 8매)</div>
+      <p>3일 팀 대항전 합산 승리 팀 전원</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>준우승팀</h4><span class="cnt">8명</span></div>
+      <div class="prize">골프공 1더즌씩 (총 8더즌)</div>
+      <p>끝까지 싸운 팀 전원</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>개인 MVP</h4><span class="cnt">1명</span></div>
+      <div class="prize">고급 안마기</div>
+      <p>3라운드 합산 개인 최저타</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>라운드 메달리스트</h4><span class="cnt">3명</span></div>
+      <div class="prize">술 1병씩</div>
+      <p>R1 · R2 · R3 각 라운드 최저타 (MVP와 중복 가능)</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>니어리스트</h4><span class="cnt">3명</span></div>
+      <div class="prize">R1 웨지 52° · R2 웨지 56° · R3 상품권</div>
+      <p>라운드별 지정 파3 1개 홀</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>롱기스트</h4><span class="cnt">3명</span></div>
+      <div class="prize">골프공 1더즌씩</div>
+      <p>라운드별 지정 파5 1개 홀</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>다버디상</h4><span class="cnt">1명</span></div>
+      <div class="prize">상품권</div>
+      <p>3일간 버디 최다</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>족구 MVP</h4><span class="cnt">1명</span></div>
+      <div class="prize">술 1병</div>
+      <p>10.31 고산구민운동장, 현장 투표</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>분위기 메이커상</h4><span class="cnt">1명</span></div>
+      <div class="prize">여행용 충전기</div>
+      <p>양 단장 공동 선정</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>행운상</h4><span class="cnt">2명</span></div>
+      <div class="prize">상품권 1매씩</div>
+      <p>시상식 현장 추첨</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>내년엔 잘하자상</h4><span class="cnt">1명</span></div>
+      <div class="prize">골프공 1더즌</div>
+      <p>3라운드 합산 최다타. 공 많이 챙기세요</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>협찬해주신 분들 <small>감사합니다</small></h2>
+  <div class="sp"><div class="scroll" style="padding-top:8px">
+    <table>
+      <thead><tr><th>협찬자</th><th>품목</th><th>사용처</th></tr></thead>
+      <tbody>
+        <tr><td>타이슨</td><td>술 2</td><td>라운드 메달리스트</td></tr>
+        <tr><td>김정탁</td><td>술 1</td><td>라운드 메달리스트</td></tr>
+        <tr><td>김동유</td><td>고급 안마기 1 · 술 1</td><td>개인 MVP · 족구 MVP</td></tr>
+        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="3">우승팀 8 · 니어 1 · 다버디 1 · 행운 2</td></tr>
+        <tr><td>임재용</td><td>상품권 4</td></tr>
+        <tr><td>조주영</td><td>상품권 4</td></tr>
+        <tr><td>김정국</td><td>골프공 5더즌</td><td rowspan="4">준우승팀 8 · 롱기스트 3 · 최다타 1</td></tr>
+        <tr><td>신용훈</td><td>골프공 3더즌</td></tr>
+        <tr><td>김성래</td><td>골프공 2더즌 · 여행용 충전기 1</td></tr>
+        <tr><td>이준헌</td><td>골프공 2더즌</td></tr>
+        <tr><td>장성집</td><td>웨지 52° · 56°</td><td>니어리스트 R1 · R2</td></tr>
+      </tbody>
+      <tfoot><tr><td>합계</td><td colspan="2">술 4 · 안마기 1 · 상품권 12 · 골프공 12더즌 · 충전기 1 · 웨지 2</td></tr></tfoot>
+    </table>
+  </div></div>
+</section>
+
+<section>
+  <h2>안내 사항</h2>
+  <ul class="rules">
+    <li>첫날 04:00 집결입니다. 전날 일찍 주무세요.</li>
+    <li>1일차 막창집은 예약이 안 됩니다. 16:50까지 도착해 줄을 섭니다.</li>
+    <li>2일차 오전 족구가 있습니다. 운동화와 여벌 옷을 챙겨 주세요.</li>
+    <li>3일차는 07:06 첫 티오프입니다. 늦어도 06:30까지 골프장에 도착해 주세요.</li>
+    <li>시상은 3일차 점심 자리에서 진행합니다.</li>
+  </ul>
+</section>
+
+<footer>GGC 운영진 · 일정은 GGC Calendar 기준이며 변경 시 다시 공지합니다.</footer>
+</div>
+</body>
+</html>

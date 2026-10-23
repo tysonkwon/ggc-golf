@@ -16,6 +16,7 @@
   --blue:#1F55A6; --blue-soft:#E4ECF8;
   --red:#B8372B; --red-soft:#F8E6E3;
   --gold:#A57A12; --gold-soft:#F6EFD9;
+  --eu-blue:#003399; --eu-gold:#FFCC00; --us-red:#B22234; --us-white:#FFFFFF; --us-navy:#3C3B6E;
   --f-display:"Black Han Sans","IBM Plex Sans KR",sans-serif;
   --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -59,7 +60,10 @@ section{display:flex;flex-direction:column;gap:16px}
 .team{background:var(--paper);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;border-top:6px solid var(--c)}
 .team.b{--c:var(--blue);--cs:var(--blue-soft)} .team.r{--c:var(--red);--cs:var(--red-soft)}
 .team header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.team h3{font-family:var(--f-display);font-weight:400;font-size:22px;margin:0;color:var(--c)}
+.team h3{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0;color:var(--c);line-height:1.1;letter-spacing:.03em}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{width:44px;height:44px;flex:none}
+.brand small{display:block;font-size:12px;color:var(--muted);font-weight:500}
 .team .idx{font-size:12px;color:var(--muted);text-align:right}
 .team .idx b{display:block;font-family:var(--f-mono);font-size:18px;color:var(--fg)}
 .team ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -137,7 +141,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 <header class="hero">
   <div class="eyebrow">GGC Official Tournament · 2026 하반기</div>
   <h1>GGC 하반기 공식대회<br>대구 원정 2박 3일</h1>
-  <p>김성래 단장과 김정국 단장이 이끄는 두 팀이 김천·대구에서 세 번의 라운드로 맞붙습니다. 족구와 막창은 덤입니다.</p>
+  <p>김성래 단장의 유럽팀과 김정국 단장의 미국팀이 김천·대구에서 세 번의 라운드로 맞붙습니다. 족구와 막창은 덤입니다.</p>
   <div class="facts">
     <div><b class="mono">10.30–11.01</b><span>금 ~ 일</span></div>
     <div><b>3 라운드</b><span>포도 · 해내다 · 대구CC</span></div>
@@ -150,7 +154,29 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
   <h2>팀 구성 <small>★ 단장</small></h2>
   <div class="teams">
     <article class="team b">
-      <header><h3>TEAM 김성래</h3><div class="idx">팀 합산<b>684.3</b></div></header>
+      <header>
+        <div class="brand">
+          <svg viewBox="0 0 44 44" role="img" aria-label="유럽팀 엠블럼">
+            <circle cx="22" cy="22" r="21" style="fill:var(--eu-blue)"/>
+            <g style="fill:var(--eu-gold)">
+              <polygon id="st" points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(22 9)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(28.5 10.74)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(33.26 15.5)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(35 22)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(33.26 28.5)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(28.5 33.26)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(22 35)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(15.5 33.26)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(10.74 28.5)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(9 22)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(10.74 15.5)"/>
+              <polygon points="0,-2.6 0.61,-0.84 2.47,-0.8 0.98,0.32 1.53,2.1 0,1.04 -1.53,2.1 -0.98,0.32 -2.47,-0.8 -0.61,-0.84" transform="translate(15.5 10.74)"/>
+            </g>
+          </svg>
+          <div><h3>TEAM EUROPE</h3><small>김성래 단장</small></div>
+        </div>
+        <div class="idx">팀 합산<b>684.3</b></div>
+      </header>
       <ol>
         <li class="cap">★ 김성래 <em>단장</em></li>
         <li>김동유</li><li>곽영주</li><li>김대호</li><li>조주영</li><li>임재용</li><li>이준헌</li><li>양성민</li>
@@ -158,7 +184,27 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     </article>
     <div class="vs">VS</div>
     <article class="team r">
-      <header><h3>TEAM 김정국</h3><div class="idx">팀 합산<b>691.1</b></div></header>
+      <header>
+        <div class="brand">
+          <svg viewBox="0 0 44 44" role="img" aria-label="미국팀 엠블럼">
+            <defs><clipPath id="usclip"><circle cx="22" cy="22" r="21"/></clipPath></defs>
+            <g clip-path="url(#usclip)">
+              <rect x="0" y="0" width="44" height="44" style="fill:var(--us-white)"/>
+              <g style="fill:var(--us-red)">
+                <rect x="0" y="1" width="44" height="3.4"/><rect x="0" y="7.8" width="44" height="3.4"/>
+                <rect x="0" y="14.6" width="44" height="3.4"/><rect x="0" y="21.4" width="44" height="3.4"/>
+                <rect x="0" y="28.2" width="44" height="3.4"/><rect x="0" y="35" width="44" height="3.4"/>
+                <rect x="0" y="41.8" width="44" height="3.4"/>
+              </g>
+              <rect x="0" y="0" width="22" height="21.4" style="fill:var(--us-navy)"/>
+              <polygon points="0,-5 1.18,-1.62 4.76,-1.55 1.9,0.62 2.94,4.05 0,2 -2.94,4.05 -1.9,0.62 -4.76,-1.55 -1.18,-1.62" transform="translate(13 12)" style="fill:var(--us-white)"/>
+            </g>
+            <circle cx="22" cy="22" r="20.5" style="fill:none;stroke:var(--us-navy);stroke-width:1"/>
+          </svg>
+          <div><h3>TEAM USA</h3><small>김정국 단장</small></div>
+        </div>
+        <div class="idx">팀 합산<b>691.1</b></div>
+      </header>
       <ol>
         <li class="cap">★ 김정국 <em>단장</em></li>
         <li>장성집</li><li>김동영</li><li>김정탁</li><li>신용훈</li><li>권태영</li><li>장노륜</li><li>홍상현</li>

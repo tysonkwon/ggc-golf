@@ -90,6 +90,8 @@ section{display:flex;flex-direction:column;gap:16px}
 .tag.warn{background:var(--gold-soft);color:var(--gold)}
 .tag.ok{background:var(--green-soft);color:var(--green)}
 .tl .sub a{color:var(--green);font-weight:700}
+.grp .d{font-size:12px;color:var(--muted);line-height:1.5}
+.grp .d b{color:var(--fg)}
 .tag.tbd{background:var(--line);color:var(--muted)}
 
 /* pairing table */
@@ -221,7 +223,13 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
   <article class="day">
     <div class="day-head"><h3>DAY 1 · 10.30 (금)</h3><span class="course">김천 포도CC</span></div>
     <ul class="tl">
-      <li><time>04:00</time><div class="what"><b>집결 후 골프장 이동</b><span class="sub">집결 장소 <span class="tag tbd">추후 공지</span></span></div></li>
+      <li><time>04:00</time><div class="what"><b>집결 후 골프장 이동</b><span class="sub">차량 4대 · 집결시간은 각 집결지 기준</span>
+        <div class="groups cars">
+          <div class="grp"><div class="t"><span>강북차</span>04:00</div><div class="n"><span class="b">김대호 · 조주영</span><span class="r">김정국 · 신용훈</span></div><div class="d">성수동 뉴엔사무실 · 신용훈은 집결지로 개별 이동</div><div class="d">차량 <b>김대호</b></div></div>
+          <div class="grp"><div class="t"><span>강남차</span>04:00</div><div class="n"><span class="b">김동유 · 임재용 · 곽영주</span><span class="r">장성집</span></div><div class="d">곽영주 집(강남데시앙포레아파트) → 하남에서 김동유 픽업</div><div class="d">차량 <b>임재용</b></div></div>
+          <div class="grp"><div class="t"><span>판교차</span>04:00</div><div class="n"><span class="b">이준헌</span><span class="r">김동영 · 권태영 · 김정탁</span></div><div class="d">이매동 아름마을태영에서 이준헌 픽업 후 아지트 집결</div><div class="d">차량 <b>김동영</b></div></div>
+          <div class="grp"><div class="t"><span>용인차</span>04:00</div><div class="n"><span class="b">양성민 · 김성래</span><span class="r">홍상현 · 장노륜</span></div><div class="d">집결지 · 차량 <span class="tag tbd" style="margin-left:0">추후 공지</span></div></div>
+        </div></div></li>
       <li class="golf"><time>08:12</time><div class="what"><b>R1 · 포도컨트리클럽</b><span class="sub">샤인 · 포도 코스 4팀 티오프 (~13:30)</span><span class="sub">골프장 문의 054-420-0200 · 예약자 김대호</span>
         <div class="groups">
           <div class="grp"><div class="t"><span>샤인</span>08:12</div><div class="n"><span class="b">김성래 · 양성민</span><span class="r">장성집 · 장노륜</span></div></div>
@@ -349,7 +357,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 <section>
   <h2>안내 사항</h2>
   <ul class="rules">
-    <li>첫날 04:00 집결입니다. 전날 일찍 주무세요.</li>
+    <li>첫날 04:00 집결입니다(차량별 집결지 기준). 전날 일찍 주무세요.</li>
     <li>1일차 막창집은 예약이 안 됩니다. 16:50까지 도착해 줄을 섭니다.</li>
     <li>2일차 오전 족구가 있습니다. 운동화와 여벌 옷을 챙겨 주세요.</li>
     <li>3일차는 07:06 첫 티오프입니다. 늦어도 06:30까지 골프장에 도착해 주세요.</li>

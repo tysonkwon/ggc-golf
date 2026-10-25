@@ -88,6 +88,8 @@ section{display:flex;flex-direction:column;gap:16px}
 .tl li.golf{background:var(--green-soft)}
 .tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:6px;vertical-align:2px}
 .tag.warn{background:var(--gold-soft);color:var(--gold)}
+.tag.ok{background:var(--green-soft);color:var(--green)}
+.tl .sub a{color:var(--green);font-weight:700}
 .tag.tbd{background:var(--line);color:var(--muted)}
 
 /* pairing table */
@@ -228,7 +230,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
           <div class="grp"><div class="t"><span>포도</span>08:19</div><div class="n"><span class="b">김대호 · 조주영</span><span class="r">김동영 · 권태영</span></div></div>
         </div></div></li>
       <li><time>13:30</time><div class="what"><b>대구로 이동</b></div></li>
-      <li><time>15:00</time><div class="what"><b>호텔 체크인 · 휴식</b><span class="sub">숙소 <span class="tag tbd">추후 공지</span></span></div></li>
+      <li><time>15:00</time><div class="what"><b>호텔 체크인 · 휴식</b><span class="sub">숙소 <a href="https://maps.app.goo.gl/fdjzEFEYnPqyuA9VA" target="_blank" rel="noopener">2월호텔 황금점</a> · 1인실 13실, 2인실 2실</span></div></li>
       <li><time>16:50</time><div class="what"><b>저녁 · 제일숯불생막창</b><span class="tag warn">예약 불가 · 오픈런</span><span class="sub">시간 엄수 부탁드립니다</span></div></li>
     </ul>
   </article>
@@ -250,7 +252,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <ul class="tl">
       <li class="golf"><time>07:06</time><div class="what"><b>R3 · 대구컨트리클럽</b><span class="sub">중코스 4팀 연속 티오프</span><span class="sub">조 편성 <span class="tag tbd">추후 공지</span></span>
         <div class="tees"><div class="tee"><span>중</span>07:06</div><div class="tee"><span>중</span>07:13</div><div class="tee"><span>중</span>07:20</div><div class="tee"><span>중</span>07:27</div></div></div></li>
-      <li><time>12:00</time><div class="what"><b>점심 · 클럽하우스</b><span class="sub">시상식 진행</span></div></li>
+      <li><time>12:00</time><div class="what"><b>점심 · 클럽하우스</b><span class="tag ok">룸 예약 완료</span><span class="sub">써클메뉴 · 인당 48,000원 · 시상식 진행</span></div></li>
       <li><time>13:00</time><div class="what"><b>서울 복귀</b></div></li>
     </ul>
   </article>
@@ -296,7 +298,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     </div>
     <div class="award">
       <div class="k"><h4>족구 MVP</h4><span class="cnt">1명</span></div>
-      <div class="prize">술 1병</div>
+      <div class="prize">상품권</div>
       <p>10.31 고산구민운동장, 현장 투표</p>
     </div>
     <div class="award">
@@ -305,9 +307,13 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
       <p>양 단장 공동 선정</p>
     </div>
     <div class="award">
-      <div class="k"><h4>행운상</h4><span class="cnt">2명</span></div>
-      <div class="prize">상품권 1매씩</div>
+      <div class="k"><h4>행운상</h4><span class="cnt">1명</span></div>
+      <div class="prize">상품권</div>
       <p>시상식 현장 추첨</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>개근상</h4><span class="cnt">2명</span></div>
+      <p>1년 내내 개근한 회원</p>
     </div>
     <div class="award">
       <div class="k"><h4>내년엔 잘하자상</h4><span class="cnt">1명</span></div>
@@ -323,10 +329,10 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <table>
       <thead><tr><th>협찬자</th><th>품목</th><th>사용처</th></tr></thead>
       <tbody>
-        <tr><td>타이슨</td><td>술 2</td><td>라운드 메달리스트</td></tr>
+        <tr><td>타이슨</td><td>술 1</td><td>라운드 메달리스트</td></tr>
         <tr><td>김정탁</td><td>술 1</td><td>라운드 메달리스트</td></tr>
-        <tr><td>김동유</td><td>고급 안마기 1 · 술 1</td><td>개인 MVP · 족구 MVP</td></tr>
-        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="3">우승팀 8 · 니어 1 · 다버디 1 · 행운 2</td></tr>
+        <tr><td>김동유</td><td>고급 안마기 1 · 술 1</td><td>개인 MVP · 라운드 메달리스트</td></tr>
+        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="3">우승팀 8 · 니어 1 · 다버디 1 · 족구 MVP 1 · 행운 1</td></tr>
         <tr><td>임재용</td><td>상품권 4</td></tr>
         <tr><td>조주영</td><td>상품권 4</td></tr>
         <tr><td>김정국</td><td>골프공 5더즌</td><td rowspan="4">준우승팀 8 · 롱기스트 3 · 최다타 1</td></tr>
@@ -335,7 +341,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
         <tr><td>이준헌</td><td>골프공 2더즌</td></tr>
         <tr><td>장성집</td><td>웨지 52° · 56°</td><td>니어리스트 R1 · R2</td></tr>
       </tbody>
-      <tfoot><tr><td>합계</td><td colspan="2">술 4 · 안마기 1 · 상품권 12 · 골프공 12더즌 · 충전기 1 · 웨지 2</td></tr></tfoot>
+      <tfoot><tr><td>합계</td><td colspan="2">술 3 · 안마기 1 · 상품권 12 · 골프공 12더즌 · 충전기 1 · 웨지 2</td></tr></tfoot>
     </table>
   </div></div>
 </section>

@@ -136,6 +136,58 @@ td.vs2{color:var(--muted);text-align:center;font-size:12px}
 .rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .rules li::marker{color:var(--green)}
 footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+
+/* tabs */
+.tabs{display:flex;gap:4px;padding:4px;background:var(--paper);border:1px solid var(--line);border-radius:12px;position:sticky;top:8px;z-index:5}
+.tabs button{flex:1;appearance:none;border:0;background:transparent;color:var(--muted);font:700 15px var(--f-body);padding:10px 12px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--green);color:var(--paper)}
+.tabs button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.panel{display:flex;flex-direction:column;gap:40px}
+
+/* results */
+.draw{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;text-align:center}
+.draw .side{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.draw .side svg{width:48px;height:48px}
+.draw .side b{font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.03em}
+.draw .side.b b{color:var(--blue)} .draw .side.r b{color:var(--red)}
+.draw .mid{display:flex;flex-direction:column;gap:2px}
+.draw .mid strong{font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1}
+.draw .mid span{font-size:12px;color:var(--muted)}
+.mvp{background:var(--gold-soft);border:1px solid var(--gold);border-radius:14px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.mvp .l{display:flex;flex-direction:column;gap:2px}
+.mvp .l small{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.08em}
+.mvp .l b{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.1}
+.mvp .l span{font-size:13px;color:var(--muted)}
+.mvp .r{font-family:var(--f-mono);font-size:30px;font-weight:600;color:var(--gold)}
+.mvp .r small{font-family:var(--f-body);font-size:13px;color:var(--muted);font-weight:500;margin-left:4px}
+.wins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.wins{grid-template-columns:1fr}}
+.win{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.win h4{margin:0;font-size:14px;color:var(--muted);font-weight:700}
+.win ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.win li{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.win li .who{font-weight:700;font-size:16px}
+.win li .who em{font-style:normal;font-size:12px;color:var(--muted);font-weight:500;margin-right:6px}
+.win li .val{font-family:var(--f-mono);font-size:14px;color:var(--muted);white-space:nowrap}
+.win .b{color:var(--blue)} .win .r{color:var(--red)}
+.win p{margin:0;font-size:12px;color:var(--muted)}
+.win.wide{grid-column:1/-1}
+.pend{display:flex;flex-wrap:wrap;gap:6px}
+.pend span{font-size:13px;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.lb{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.lb table{min-width:440px}
+.lb td,.lb th{text-align:right}
+.lb td:nth-child(1),.lb th:nth-child(1){text-align:center;width:36px}
+.lb td:nth-child(2),.lb th:nth-child(2){text-align:left}
+.lb td.n{font-weight:700}
+.lb td.n.b{color:var(--blue)} .lb td.n.r{color:var(--red)}
+.lb td.t{font-weight:700;font-family:var(--f-mono)}
+.lb td.m{font-family:var(--f-mono)}
+.lb td.best{color:var(--green);font-weight:700}
+.lb tr.top td{background:var(--gold-soft)}
+.legend{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;padding:10px 18px 14px}
+.legend i{font-style:normal;font-weight:700}
+.legend .b{color:var(--blue)} .legend .r{color:var(--red)} .legend .g{color:var(--green)}
 </style>
 </head>
 <body>
@@ -153,6 +205,120 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <div><b>2팀</b><span>팀 대항전</span></div>
   </div>
 </header>
+
+<nav class="tabs" role="tablist" aria-label="보기 전환">
+  <button role="tab" id="t-result" aria-controls="p-result" aria-selected="true">대회 결과</button>
+  <button role="tab" id="t-info" aria-controls="p-info" aria-selected="false">대회 안내</button>
+</nav>
+
+<div class="panel" id="p-result" role="tabpanel" aria-labelledby="t-result">
+
+<section>
+  <h2>팀 대항전 <small>3라운드 합산</small></h2>
+  <div class="draw">
+    <div class="side b">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="23" style="fill:var(--eu-blue)"/><text x="24" y="29" text-anchor="middle" style="fill:var(--eu-gold);font:700 14px var(--f-body)">EU</text></svg>
+      <b>TEAM EUROPE</b>
+    </div>
+    <div class="mid"><strong>DRAW</strong><span>무승부</span></div>
+    <div class="side r">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="23" style="fill:var(--us-navy)"/><text x="24" y="29" text-anchor="middle" style="fill:#fff;font:700 14px var(--f-body)">US</text></svg>
+      <b>TEAM USA</b>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>개인 시상</h2>
+  <div class="mvp">
+    <div class="l"><small>개인 MVP · 3라운드 합산 최저타</small><b>김성래</b><span>79 · 81 · 77</span></div>
+    <div class="r">237<small>타</small></div>
+  </div>
+  <div class="wins">
+    <div class="win wide">
+      <h4>라운드 메달리스트 · 라운드별 신페리오 1위</h4>
+      <ul>
+        <li><span class="who r"><em>R1 포도</em>장성집</span><span class="val">72.4</span></li>
+        <li><span class="who r"><em>R2 해내다</em>장성집</span><span class="val">76.6</span></li>
+        <li><span class="who r"><em>R3 대구</em>김정국</span><span class="val">70.2</span></li>
+      </ul>
+      <p>R1은 김정국과 72.4 동점, 집계표 순위 기준</p>
+    </div>
+    <div class="win">
+      <h4>니어리스트</h4>
+      <ul>
+        <li><span class="who b"><em>R1</em>이준헌</span><span class="val">2m</span></li>
+        <li><span class="who r"><em>R2</em>김정국</span><span class="val">0.3m</span></li>
+        <li><span class="who b"><em>R3</em>이준헌</span><span class="val">3m</span></li>
+      </ul>
+    </div>
+    <div class="win">
+      <h4>롱기스트</h4>
+      <ul>
+        <li><span class="who b"><em>R1</em>김동유</span><span class="val">260m</span></li>
+        <li><span class="who b"><em>R2</em>김성래</span><span class="val">280m</span></li>
+        <li><span class="who b"><em>R3</em>김동유</span><span class="val">260m</span></li>
+      </ul>
+    </div>
+    <div class="win">
+      <h4>다버디상</h4>
+      <ul><li><span class="who b">김성래</span><span class="val">버디 9</span></li></ul>
+      <p>R1 2 · R2 4 · R3 3</p>
+    </div>
+    <div class="win">
+      <h4>기량발전상 · 신페리오 3일 합산</h4>
+      <ul><li><span class="who r">김정국</span><span class="val">222.4</span></li></ul>
+      <p>72.4 · 79.8 · 70.2</p>
+    </div>
+    <div class="win">
+      <h4>파 행진상 · 3일 파 최다</h4>
+      <div class="pend"><span>김정국</span><span>장성집</span><span>김대호</span><span>김동유</span><span>김동영</span></div>
+      <p>5명 25개 동률 · 현장 결정</p>
+    </div>
+    <div class="win">
+      <h4>내년엔 잘하자상</h4>
+      <ul><li><span class="who r">홍상현</span><span class="val">293</span></li></ul>
+      <p>92 · 100 · 101</p>
+    </div>
+    <div class="win wide">
+      <h4>현장 선정 · 추첨</h4>
+      <div class="pend"><span>족구 MVP</span><span>분위기 메이커상</span><span>행운상 2</span><span>개근상 2</span><span>베스트 드레서상</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>리더보드 <small>그로스 스코어</small></h2>
+  <div class="lb"><div class="scroll" style="padding-top:8px">
+    <table>
+      <thead><tr><th>#</th><th>이름</th><th>R1</th><th>R2</th><th>R3</th><th>합계</th><th>버디</th></tr></thead>
+      <tbody>
+        <tr class="top"><td>1</td><td class="n b">김성래</td><td class="m best">79</td><td class="m">81</td><td class="m best">77</td><td class="t">237</td><td class="m">9</td></tr>
+        <tr><td>2</td><td class="n r">장성집</td><td class="m">82</td><td class="m best">73</td><td class="m">84</td><td class="t">239</td><td class="m">7</td></tr>
+        <tr><td>3</td><td class="n r">김정국</td><td class="m">82</td><td class="m">81</td><td class="m">81</td><td class="t">244</td><td class="m">5</td></tr>
+        <tr><td>4</td><td class="n r">김동영</td><td class="m">81</td><td class="m">81</td><td class="m">85</td><td class="t">247</td><td class="m">2</td></tr>
+        <tr><td>5</td><td class="n b">김동유</td><td class="m best">79</td><td class="m">83</td><td class="m">86</td><td class="t">248</td><td class="m">2</td></tr>
+        <tr><td>6</td><td class="n b">김대호</td><td class="m best">79</td><td class="m">82</td><td class="m">88</td><td class="t">249</td><td class="m">3</td></tr>
+        <tr><td>7</td><td class="n r">김정탁</td><td class="m">84</td><td class="m">84</td><td class="m">82</td><td class="t">250</td><td class="m">4</td></tr>
+        <tr><td>8</td><td class="n r">신용훈</td><td class="m">84</td><td class="m">91</td><td class="m">80</td><td class="t">255</td><td class="m">2</td></tr>
+        <tr><td>9</td><td class="n b">곽영주</td><td class="m">86</td><td class="m">83</td><td class="m">89</td><td class="t">258</td><td class="m">2</td></tr>
+        <tr><td>10</td><td class="n b">이준헌</td><td class="m">84</td><td class="m">83</td><td class="m">93</td><td class="t">260</td><td class="m">0</td></tr>
+        <tr><td>11</td><td class="n b">조주영</td><td class="m">80</td><td class="m">92</td><td class="m">91</td><td class="t">263</td><td class="m">3</td></tr>
+        <tr><td>12</td><td class="n b">임재용</td><td class="m">84</td><td class="m">93</td><td class="m">87</td><td class="t">264</td><td class="m">1</td></tr>
+        <tr><td>13</td><td class="n r">권태영</td><td class="m">84</td><td class="m">107</td><td class="m">92</td><td class="t">283</td><td class="m">3</td></tr>
+        <tr><td>14</td><td class="n b">양성민</td><td class="m">95</td><td class="m">99</td><td class="m">93</td><td class="t">287</td><td class="m">1</td></tr>
+        <tr><td>15</td><td class="n r">장노륜</td><td class="m">95</td><td class="m">96</td><td class="m">99</td><td class="t">290</td><td class="m">1</td></tr>
+        <tr><td>16</td><td class="n r">홍상현</td><td class="m">92</td><td class="m">100</td><td class="m">101</td><td class="t">293</td><td class="m">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="legend"><span><i class="b">파랑</i> 유럽</span><span><i class="r">빨강</i> 미국</span><span><i class="g">초록</i> 라운드 최저타</span></div>
+  </div>
+</section>
+
+</div>
+
+<div class="panel" id="p-info" role="tabpanel" aria-labelledby="t-info" hidden>
 
 <section>
   <h2>팀 구성 <small>★ 단장</small></h2>
@@ -297,7 +463,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <div class="award">
       <div class="k"><h4>라운드 메달리스트</h4><span class="cnt">3명</span></div>
       <div class="prize">술 1병씩</div>
-      <p>R1 · R2 · R3 각 라운드 최저타 (MVP와 중복 가능)</p>
+      <p>R1 · R2 · R3 각 라운드 신페리오 1위</p>
     </div>
     <div class="award">
       <div class="k"><h4>니어리스트</h4><span class="cnt">3명</span></div>
@@ -393,7 +559,26 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
   </ul>
 </section>
 
-<footer>GGC 운영진 · 일정은 GGC Calendar 기준이며 변경 시 다시 공지합니다.</footer>
 </div>
+
+<footer>GGC 운영진 · 결과는 골프장 집계표 기준입니다.</footer>
+</div>
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tabs [role=tab]'));
+  function show(id){
+    tabs.forEach(function(t){
+      var on=t.getAttribute('aria-controls')===id;
+      t.setAttribute('aria-selected',on);
+      document.getElementById(t.getAttribute('aria-controls')).hidden=!on;
+    });
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    var id=t.getAttribute('aria-controls');show(id);
+    try{history.replaceState(null,'','#'+(id==='p-info'?'info':'result'))}catch(e){}
+  })});
+  if(location.hash==='#info')show('p-info');
+})();
+</script>
 </body>
 </html>

@@ -172,6 +172,8 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 .win .b{color:var(--blue)} .win .r{color:var(--red)}
 .win p{margin:0;font-size:12px;color:var(--muted)}
 .win.wide{grid-column:1/-1}
+.win li.hon{display:block;font-size:12px;color:var(--muted);margin:-2px 0 4px;padding-left:2px}
+.win li.hon b{font-weight:700}
 .pend{display:flex;flex-wrap:wrap;gap:6px}
 .pend span{font-size:13px;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
 .lb{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -240,18 +242,20 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
       <ul>
         <li><span class="who r"><em>R1 포도</em>장성집</span><span class="val">72.4</span></li>
         <li><span class="who b"><em>R2 해내다</em>곽영주</span><span class="val">78.2</span></li>
+        <li class="hon">🏅 명예 1위 <b class="r">장성집</b> 76.6</li>
         <li><span class="who r"><em>R3 대구</em>김정국</span><span class="val">70.2</span></li>
       </ul>
-      <p>R1은 김정국과 72.4 동점, 집계표 순위 기준 · R2는 신페리오 2위</p>
+      <p>R1은 김정국과 72.4 동점, 집계표 순위 기준 · 중복 수상 시 차순위가 수상하고 실제 1위는 명예 1위로 표기</p>
     </div>
     <div class="win">
       <h4>니어리스트</h4>
       <ul>
         <li><span class="who b"><em>R1</em>이준헌</span><span class="val">2m</span></li>
-        <li><span class="who r"><em>R2</em>김정국</span><span class="val">0.3m</span></li>
+        <li><span class="who b"><em>R2</em>양성민</span><span class="val">4m</span></li>
+        <li class="hon">🏅 명예 1위 <b class="r">김정국</b> 0.3m</li>
         <li><span class="who b"><em>R3</em>조주영</span><span class="val">5m</span></li>
+        <li class="hon">🏅 명예 1위 <b class="b">이준헌</b> 3m</li>
       </ul>
-      <p>R3는 중복 방지로 2위</p>
     </div>
     <div class="win">
       <h4>롱기스트</h4>
@@ -259,8 +263,8 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
         <li><span class="who b"><em>R1</em>김동유</span><span class="val">260m</span></li>
         <li><span class="who b"><em>R2</em>김성래</span><span class="val">280m</span></li>
         <li><span class="who r"><em>R3</em>김정탁</span><span class="val">250m</span></li>
+        <li class="hon">🏅 명예 1위 <b class="b">김동유</b> 260m</li>
       </ul>
-      <p>R3는 중복 방지로 2위</p>
     </div>
     <div class="win">
       <h4>다버디상</h4>
@@ -268,17 +272,24 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
       <p>R1 2 · R2 4 · R3 3</p>
     </div>
     <div class="win">
-      <h4>기량발전상 · 신페리오 3일 합산</h4>
-      <ul><li><span class="who r">김정국</span><span class="val">222.4</span></li></ul>
-      <p>72.4 · 79.8 · 70.2</p>
+      <h4>유종의 미상 · 마지막 날 베스트</h4>
+      <ul><li><span class="who r">신용훈</span><span class="val">80</span></li></ul>
+      <p>R3 대구 전체 2위 · 개인 3일 중 최고 (R2 91 → 80)</p>
     </div>
     <div class="win">
       <h4>파 행진상 · 최다 연속 파</h4>
-      <ul>
-        <li><span class="who b"><em>R2 1~6번</em>이준헌</span><span class="val">6연속</span></li>
-        <li><span class="who r"><em>R1 후반 4~9번</em>권태영</span><span class="val">6연속</span></li>
-      </ul>
-      <p>공동 수상 · 확인 가능한 스코어카드 기준</p>
+      <ul><li><span class="who r">김동영</span><span class="val">6연속</span></li></ul>
+      <p>R3 대구 전반 8번 ~ 후반 4번</p>
+    </div>
+    <div class="win">
+      <h4>파3상 · 3일 파3 최소타</h4>
+      <ul><li><span class="who r">김동영</span><span class="val">+3</span></li></ul>
+      <p>파3 12홀 · 버디 1 · 파 7</p>
+    </div>
+    <div class="win">
+      <h4>파5상 · 3일 파5 최소타</h4>
+      <ul><li><span class="who r">김정탁</span><span class="val">+1</span></li></ul>
+      <p>파5 11홀 · 버디 3</p>
     </div>
     <div class="win">
       <h4>이글상</h4>
@@ -301,6 +312,8 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
         <li><span class="who b"><em>족구 MVP</em>이준헌</span><span class="val">현장 투표</span></li>
         <li><span class="who b"><em>분위기 메이커상</em>임재용</span><span class="val">단장 선정</span></li>
         <li><span class="who"><em>개근상</em><span class="r">김동영 · 김정국</span></span><span class="val">1년 개근</span></li>
+        <li><span class="who b"><em>부상투혼상</em>김대호</span><span class="val">끝까지 완주</span></li>
+        <li><span class="who r"><em>알콜러상</em>장노륜</span><span class="val">3일 개근 음주</span></li>
       </ul>
       <div class="pend"><span>행운상 2 · 시상식 현장 추첨</span></div>
     </div>
@@ -506,6 +519,14 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
       <p>3일 중 최다 연속 파</p>
     </div>
     <div class="award">
+      <div class="k"><h4>파3상</h4><span class="cnt">1명</span></div>
+      <p>3일간 파3 홀 합산 최소타</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>파5상</h4><span class="cnt">1명</span></div>
+      <p>3일간 파5 홀 합산 최소타</p>
+    </div>
+    <div class="award">
       <div class="k"><h4>족구 MVP</h4><span class="cnt">1명</span></div>
       <div class="prize">상품권</div>
       <p>10.31 고산구민운동장, 현장 투표</p>
@@ -526,9 +547,17 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
       <p>1년 내내 개근한 회원</p>
     </div>
     <div class="award">
-      <div class="k"><h4>기량발전상</h4><span class="cnt">1명</span></div>
+      <div class="k"><h4>유종의 미상</h4><span class="cnt">1명</span></div>
       <div class="prize">상품권</div>
-      <p>3라운드 합산, 핸디 대비 가장 잘 친 회원</p>
+      <p>마지막 날 가장 빛난 회원</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>부상투혼상</h4><span class="cnt">1명</span></div>
+      <p>부상을 딛고 끝까지 완주한 회원</p>
+    </div>
+    <div class="award">
+      <div class="k"><h4>알콜러상</h4><span class="cnt">1명</span></div>
+      <p>3일간 가장 뜨겁게 마신 회원</p>
     </div>
     <div class="award">
       <div class="k"><h4>이글상</h4><span class="cnt">1명</span></div>
@@ -557,7 +586,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
         <tr><td>김정탁</td><td>술 1</td><td>라운드 메달리스트</td></tr>
         <tr><td>김동유</td><td>고급 안마기 1 · 술 1</td><td>개인 MVP · 라운드 메달리스트</td></tr>
         <tr><td>김동영</td><td>술 1</td><td>파 행진상</td></tr>
-        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="4">우승팀 8 · 니어 1 · 다버디 1 · 족구 MVP 1 · 행운 2 · 개근 2 · 기량발전 1 · 이글 1</td></tr>
+        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="4">우승팀 8 · 니어 1 · 다버디 1 · 족구 MVP 1 · 행운 2 · 개근 2 · 유종의 미 1 · 이글 1</td></tr>
         <tr><td>임재용</td><td>상품권 4</td></tr>
         <tr><td>조주영</td><td>상품권 4</td></tr>
         <tr><td>김대호</td><td>상품권 5</td></tr>

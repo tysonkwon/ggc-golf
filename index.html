@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26년 GGC 월례회</title>
+    <title>GGC 월례회</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* ── Theme variables ── */
@@ -240,6 +240,16 @@
         .nav-tab.active { background: white; color: #1b4332; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .nav-tab:hover:not(.active) { color: white; }
 
+        /* Year selector */
+        .year-selector { display: flex; gap: 6px; margin-bottom: 14px; }
+        .year-btn { padding: 7px 18px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.15s; }
+        .year-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .year-btn.active { background: #fff; color: #1b4332; border-color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+
+        /* Stats year toggle */
+        .stats-year-toggle { display: flex; gap: 0; margin-bottom: 10px; border: 1.5px solid var(--input-border); border-radius: 10px; overflow: hidden; width: fit-content; }
+        .stats-year-toggle button { padding: 7px 14px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; }
+
         /* Stats */
         .stats-table { width: 100%; border-collapse: collapse; }
         .stats-table th { font-size: 12px; font-weight: 700; color: var(--text-faint); text-align: center; padding: 6px 4px 10px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -310,7 +320,7 @@
 
 <div class="container">
     <div class="header">
-        <h1>⛳ 26년 GGC 월례회</h1>
+        <h1 id="appTitle">⛳ GGC 월례회</h1>
         <div class="sub">16인 정기 라운드</div>
     </div>
 
@@ -322,6 +332,7 @@
 
     <!-- Round page -->
     <div id="pageRound">
+    <div class="year-selector" id="yearSelector"></div>
     <div class="tab-scroll">
         <div class="tab-row" id="tabRow"></div>
     </div>
@@ -393,6 +404,7 @@
     <div id="pageStats" style="display:none">
         <div class="card">
             <div class="card-title">📊 참석 통계</div>
+            <div class="stats-year-toggle" id="statsYearToggle"></div>
             <div id="statsScopeToggle" style="display:flex;gap:0;margin-bottom:14px;border:1.5px solid var(--input-border);border-radius:10px;overflow:hidden;width:fit-content">
                 <button type="button" id="scopeOfficial" onclick="setStatsScope('official')" style="padding:7px 16px;border:none;background:#2e7d4f;color:#fff;font-size:13px;font-weight:700;cursor:pointer">공식만</button>
                 <button type="button" id="scopeAll" onclick="setStatsScope('all')" style="padding:7px 16px;border:none;background:var(--card-bg);color:var(--text-faint);font-size:13px;font-weight:700;cursor:pointer">전체</button>
@@ -688,6 +700,31 @@ let groupResults = {};  // {round_id: [[m1,m2,m3,m4],[...],[...]]}
 let scores = {};        // {round_id: {member_name: score}}
 let groupRatings = {};  // {round_id: {group_index: {cr, sr}}}
 let activeId = null;
+let activeYear = null;   // 조편성 탭에서 보고 있는 연도
+let statsYear = null;    // 통계 연도 범위: 숫자(특정 연도) 또는 'all'(누적)
+
+// 라운드의 연도 (year 컬럼, 없으면 2026)
+function roundYear(r) { return (r && r.year) || 2026; }
+// 연도를 포함한 절대 정렬 순서: 연도*10000 + 월*100 + 일
+function roundAbsOrder(r) { return roundYear(r) * 10000 + parseDateOrder(r.date); }
+function currentAbsOrder() { const n = new Date(); return n.getFullYear() * 10000 + (n.getMonth() + 1) * 100 + n.getDate(); }
+// 선택 가능한 연도: 데이터에 있는 연도 ∪ {2026, 올해, 내년}
+function availableYears() {
+    const ys = new Set(rounds.map(roundYear));
+    const cy = new Date().getFullYear();
+    ys.add(2026); ys.add(cy); ys.add(cy + 1);
+    return [...ys].sort((a, b) => a - b);
+}
+// 현재 선택 연도의 라운드만
+function yearRounds() { return rounds.filter(r => roundYear(r) === activeYear); }
+// 기본 표시 연도: 올해 데이터가 있으면 올해, 없으면 데이터의 최신 연도, 그것도 없으면 올해
+function getDefaultYear() {
+    const cy = new Date().getFullYear();
+    const dataYears = new Set(rounds.map(roundYear));
+    if (dataYears.has(cy)) return cy;
+    if (dataYears.size) return Math.max(...dataYears);
+    return cy;
+}
 
 // 날짜 문자열 "6/19(금)" → 정렬용 숫자 (월*100+일)
 function parseDateOrder(dateStr) {
@@ -704,30 +741,27 @@ function parseTeeTime(t) {
 
 function sortRounds() {
     rounds.sort((a, b) => {
-        const d = parseDateOrder(a.date) - parseDateOrder(b.date);
+        const d = roundAbsOrder(a) - roundAbsOrder(b);
         return d !== 0 ? d : parseTeeTime(a.tee_time) - parseTeeTime(b.tee_time);
     });
 }
 
+// 현재 선택 연도 내에서 기본 활성 라운드 결정
 function getDefaultRoundId() {
-    if (rounds.length === 0) return null;
-    const now = new Date();
-    const todayOrder = (now.getMonth() + 1) * 100 + now.getDate();
+    const list = yearRounds();
+    if (list.length === 0) return null;
+    const today = currentAbsOrder();
     // 오늘 이후 라운드 중 가장 가까운 것
-    const upcoming = rounds.find(r => parseDateOrder(r.date) >= todayOrder);
+    const upcoming = list.find(r => roundAbsOrder(r) >= today);
     // 없으면 마지막 라운드 (모두 지난 경우)
-    return upcoming ? upcoming.id : rounds[rounds.length - 1].id;
+    return upcoming ? upcoming.id : list[list.length - 1].id;
 }
 
 // --- 종료된 라운드 편집 보호 ---
-function currentDateOrder() {
-    const n = new Date();
-    return (n.getMonth() + 1) * 100 + n.getDate();
-}
-// 종료된 라운드 = 날짜가 오늘 포함 이전
+// 종료된 라운드 = 날짜가 오늘 포함 이전 (연도 포함 비교)
 function isRoundEnded(round) {
     if (!round || !round.date) return false;
-    return parseDateOrder(round.date) <= currentDateOrder();
+    return roundAbsOrder(round) <= currentAbsOrder();
 }
 async function sha256hex(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -801,6 +835,8 @@ async function init() {
             groupRatings[gr.round_id][gr.group_index] = { cr: gr.course_rating, sr: gr.slope_rating, tee: gr.tee_color };
         });
 
+        activeYear = getDefaultYear();
+        statsYear = activeYear;
         activeId = getDefaultRoundId();
         render();
         setTimeout(() => scrollActiveTabToCenter(false), 80);
@@ -823,8 +859,25 @@ function officialBadge(round) {
 
 // --- Render ---
 function render() {
+    document.getElementById('appTitle').textContent = `⛳ ${String(activeYear).slice(2)}년 GGC 월례회`;
+    renderYearSelector();
     renderTabs();
-    if (!activeRound()) return;
+    if (!activeRound()) {
+        // 선택 연도에 라운드가 없을 때: 신청/결과 영역 비우고 안내
+        document.getElementById('memberGrid').innerHTML = '';
+        document.getElementById('guestSection').innerHTML = '';
+        document.getElementById('resultCard').style.display = 'none';
+        document.getElementById('assignBtn').disabled = true;
+        document.getElementById('countDisplay').innerHTML = `0 <span>/ 12명</span>`;
+        document.getElementById('progressFill').style.width = '0%';
+        document.getElementById('roundDateLabel').textContent = '';
+        document.getElementById('roundVenueLabel').textContent = '';
+        document.getElementById('roundOfficialLabel').innerHTML = '';
+        document.getElementById('roundNotes').style.display = 'none';
+        document.getElementById('roundDetailBar').innerHTML =
+            `<div style="color:var(--text-muted);font-size:13px;padding:4px 0">${activeYear}년에 등록된 라운드가 없습니다. 탭의 ＋ 로 라운드를 추가하세요.</div>`;
+        return;
+    }
     const round = activeRound();
     const sel = attendance[round.id] || new Set();
 
@@ -890,9 +943,26 @@ function render() {
     }
 }
 
+function renderYearSelector() {
+    const el = document.getElementById('yearSelector');
+    if (!el) return;
+    el.innerHTML = availableYears().map(y =>
+        `<button class="year-btn${y === activeYear ? ' active' : ''}" onclick="switchYear(${y})">${String(y).slice(2)}년</button>`
+    ).join('');
+}
+
+function switchYear(y) {
+    if (activeYear === y) return;
+    activeYear = y;
+    statsYear = y;
+    activeId = getDefaultRoundId();
+    render();
+    setTimeout(() => scrollActiveTabToCenter(false), 60);
+}
+
 function renderTabs() {
     const row = document.getElementById('tabRow');
-    row.innerHTML = rounds.map(r => {
+    row.innerHTML = yearRounds().map(r => {
         const isActive = r.id === activeId;
         const count = (attendance[r.id] || new Set()).size;
         const mx = getMax(r);
@@ -913,7 +983,7 @@ function renderTabs() {
 }
 
 function scrollActiveTabToCenter(smooth) {
-    const idx = rounds.findIndex(r => r.id === activeId);
+    const idx = yearRounds().findIndex(r => r.id === activeId);
     const tabs = document.querySelectorAll('.tab-btn:not(.add-tab)');
     const tab = tabs[idx];
     const scroll = document.querySelector('.tab-scroll');
@@ -1520,10 +1590,10 @@ async function addCustomRound() {
     const is_official = document.getElementById('inputIsOfficial').checked;
 
     const id = 'custom_' + Date.now();
-    const { error } = await sb.from('rounds').insert({ id, date, venue, is_custom: true, max_players, is_official });
+    const { error } = await sb.from('rounds').insert({ id, date, venue, is_custom: true, max_players, is_official, year: activeYear });
     if (error) { alert('저장 실패: ' + error.message); return; }
 
-    rounds.push({ id, date, venue, is_custom: true, max_players, is_official });
+    rounds.push({ id, date, venue, is_custom: true, max_players, is_official, year: activeYear });
     sortRounds();
     attendance[id] = new Set();
     guests[id] = new Set();
@@ -1531,7 +1601,7 @@ async function addCustomRound() {
     closeModal();
     render();
     setTimeout(() => {
-        const idx = rounds.findIndex(r => r.id === id);
+        const idx = yearRounds().findIndex(r => r.id === id);
         const tabs = document.querySelectorAll('.tab-btn:not(.add-tab)');
         if (tabs[idx]) tabs[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }, 100);
@@ -1556,7 +1626,7 @@ async function deleteCurrentRound() {
     delete groupResults[round.id];
     delete scores[round.id];
     delete groupRatings[round.id];
-    activeId = rounds[0]?.id || null;
+    activeId = yearRounds()[0]?.id || null;
     render();
     showToast('라운드가 삭제되었습니다');
 }
@@ -1592,16 +1662,58 @@ function setStatsScope(scope) {
     renderStats();
 }
 
-function renderStats() {
-    const todayOrder = parseDateOrder(
-        (() => { const n = new Date(); return `${n.getMonth()+1}/${n.getDate()}`; })()
-    );
+// 통계 연도 범위 토글: 데이터가 있는 연도들 + 누적
+function renderStatsYearToggle() {
+    const el = document.getElementById('statsYearToggle');
+    if (!el) return;
+    const years = availableYears().filter(y => rounds.some(r => roundYear(r) === y));
+    if (!years.includes(activeYear)) years.push(activeYear);
+    years.sort((a, b) => a - b);
+    const on = 'background:#2e7d4f;color:#fff', off = 'background:var(--card-bg);color:var(--text-faint)';
+    const opts = years.map(y => ({ v: y, label: `${String(y).slice(2)}년` }));
+    opts.push({ v: 'all', label: '누적' });
+    el.innerHTML = opts.map(o => {
+        const arg = typeof o.v === 'number' ? o.v : `'all'`;
+        const sel = statsYear === o.v ? on : off;
+        return `<button type="button" onclick="setStatsYear(${arg})" style="${sel}">${o.label}</button>`;
+    }).join('');
+}
 
-    // 조편성 완료 + 오늘 이하 라운드만 (+ 공식만 모드면 비공식 제외)
+function setStatsYear(y) {
+    statsYear = y;
+    renderStats();
+}
+
+// 특정 연도의 멤버 평균타수 (현재 공식/전체 범위 반영, 완료+오늘 이하 라운드 기준)
+function memberYearAvg(name, year) {
+    const rs = rounds.filter(r => {
+        if (statsScope === 'official' && r.is_official === false) return false;
+        if (roundYear(r) !== year) return false;
+        const g = groupResults[r.id];
+        return g && g.some(grp => grp.length > 0) && roundAbsOrder(r) <= currentAbsOrder();
+    });
+    const vals = [];
+    rs.forEach(r => { const s = scores[r.id] && scores[r.id][name]; if (s != null) vals.push(s); });
+    if (!vals.length) return null;
+    return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+
+// '작년대비' 기준값: 특정 연도 보기면 전년도 평균(2025는 상수 LAST_YEAR_AVG), 누적이면 2025 상수
+function baselineAvgFor(name) {
+    if (statsYear === 'all') return LAST_YEAR_AVG[name] ?? null;
+    const prevY = statsYear - 1;
+    if (prevY === 2025) return LAST_YEAR_AVG[name] ?? null;
+    return memberYearAvg(name, prevY);
+}
+
+function renderStats() {
+    renderStatsYearToggle();
+    // 조편성 완료 + 오늘 이하 라운드만 (+ 공식만 모드면 비공식 제외, + 연도 범위)
     const completedRounds = rounds.filter(r => {
         if (statsScope === 'official' && r.is_official === false) return false;
+        if (statsYear !== 'all' && roundYear(r) !== statsYear) return false;
         const g = groupResults[r.id];
-        return g && g.some(grp => grp.length > 0) && parseDateOrder(r.date) <= todayOrder;
+        return g && g.some(grp => grp.length > 0) && roundAbsOrder(r) <= currentAbsOrder();
     });
     const totalRounds = completedRounds.length;
 
@@ -1731,7 +1843,7 @@ function renderScoreStats(completedRounds, totalRounds) {
         const avg = memberScores.reduce((a, b) => a + b, 0) / memberScores.length;
         const avgRounded = Math.round(avg * 10) / 10;
         const handicap = calcHandicap(differentials);
-        const lastYearAvg = LAST_YEAR_AVG[name] ?? null;
+        const lastYearAvg = baselineAvgFor(name);
         const hcpDiff = (lastYearAvg != null)
             ? Math.round((avgRounded - lastYearAvg) * 10) / 10
             : null;
@@ -1772,13 +1884,13 @@ function renderScoreStats(completedRounds, totalRounds) {
         th.innerHTML = sortLabels[key] + arrow;
     });
 
-    const renderRow = (m, i, showRank) => {
+    const renderRow = (m, i, showRank, accent) => {
         const rankClass = showRank ? (i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n') : 'rank-n';
         const rankLabel = showRank && i < 3 ? i + 1 : '';
         const scoreRate = totalRounds > 0 ? Math.round(m.count / totalRounds * 100) + '%' : '-';
         return `
             <tr>
-                <td>
+                <td style="border-left:3px solid ${accent || 'transparent'};padding-left:8px">
                     <div style="display:flex;align-items:center;gap:7px">
                         <span class="rank-badge ${rankClass}">${rankLabel}</span>
                         ${m.name}
@@ -1799,10 +1911,30 @@ function renderScoreStats(completedRounds, totalRounds) {
         `;
     };
 
+    // 1부~4부 블록 색상 (4명씩 끊어 상위부터)
+    const blockPalette = [
+        { bg: '#fff8e1', fg: '#b45309', accent: '#f59e0b' }, // 1부
+        { bg: '#e0f2fe', fg: '#0369a1', accent: '#0ea5e9' }, // 2부
+        { bg: '#fce7f3', fg: '#9d174d', accent: '#ec4899' }, // 3부
+        { bg: '#dcfce7', fg: '#15803d', accent: '#22c55e' }, // 4부
+    ];
+    const blockHeader = (bi) => {
+        const pal = blockPalette[bi % blockPalette.length];
+        return `<tr><td colspan="7" style="padding:12px 4px 5px;border-top:none">
+            <span style="display:inline-block;padding:3px 13px;border-radius:20px;font-size:12px;font-weight:800;background:${pal.bg};color:${pal.fg}">${bi + 1}부</span>
+            <span style="font-size:10px;color:var(--text-faint);margin-left:6px">${bi * 4 + 1}~${bi * 4 + 4}위</span>
+        </td></tr>`;
+    };
+
     if (memberScoreStats.length === 0) {
         document.getElementById('scoreStatsBody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9aab9d;padding:16px">저장된 타수 기록이 없습니다</td></tr>`;
     } else {
-        let html = qualified.map((m, i) => renderRow(m, i, true)).join('');
+        let html = '';
+        qualified.forEach((m, i) => {
+            if (i % 4 === 0) html += blockHeader(Math.floor(i / 4));
+            const pal = blockPalette[Math.floor(i / 4) % blockPalette.length];
+            html += renderRow(m, i, true, pal.accent);
+        });
         if (disqualified.length > 0) {
             html += `<tr><td colspan="7" style="padding:10px 4px 4px;font-size:11px;font-weight:700;color:#9aab9d;letter-spacing:0.4px;text-transform:uppercase">규정타석 미달 (참석률 40% 미만)</td></tr>`;
             html += disqualified.map((m, i) => renderRow(m, i, false)).join('');

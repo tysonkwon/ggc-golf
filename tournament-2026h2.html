@@ -165,7 +165,11 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 .win{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .win h4{margin:0;font-size:14px;color:var(--muted);font-weight:700}
 .win ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
-.win li{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.win li{display:flex;justify-content:space-between;align-items:baseline;gap:0 8px;flex-wrap:wrap}
+.pz{flex-basis:100%;display:block;font-size:12px;font-weight:700;color:var(--gold);margin-top:-2px}
+.mvp .ret{flex-basis:100%;font-size:13px;color:var(--muted);border-top:1px dashed var(--gold);padding-top:10px}
+.mvp .ret .b{color:var(--blue)}
+.ret-tag{font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-soft);border-radius:4px;padding:0 5px;margin-left:4px;vertical-align:1px}
 .win li .who{font-weight:700;font-size:16px}
 .win li .who em{font-style:normal;font-size:12px;color:var(--muted);font-weight:500;margin-right:6px}
 .win li .val{font-family:var(--f-mono);font-size:14px;color:var(--muted);white-space:nowrap}
@@ -233,82 +237,84 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 <section>
   <h2>개인 시상</h2>
   <div class="mvp">
-    <div class="l"><small>개인 MVP · 3라운드 합산 최저타</small><b>김성래</b><span>79 · 81 · 77</span></div>
-    <div class="r">237<small>타</small></div>
+    <div class="l"><small>개인 챔피언 · 3라운드 합산</small><b>장성집</b><span>82 · 73 · 84</span><span class="pz">상품권 30만원</span></div>
+    <div class="r">239<small>타</small></div>
+    <div class="ret">🏅 명예 MVP <b class="b">김성래</b> 237타 · 개인 MVP 은퇴</div>
   </div>
   <div class="wins">
     <div class="win wide">
       <h4>라운드 메달리스트 · 라운드별 신페리오 1위</h4>
       <ul>
-        <li><span class="who r"><em>R1 포도</em>장성집</span><span class="val">72.4</span></li>
-        <li><span class="who b"><em>R2 해내다</em>곽영주</span><span class="val">78.2</span></li>
+        <li><span class="who r"><em>R1 포도</em>김정국</span><span class="val">72.4</span><span class="pz">상품권 20만원</span></li>
+        <li class="hon">🏅 명예 1위 <b class="r">장성집</b> 72.4</li>
+        <li><span class="who b"><em>R2 해내다</em>곽영주</span><span class="val">78.2</span><span class="pz">상품권 20만원</span></li>
         <li class="hon">🏅 명예 1위 <b class="r">장성집</b> 76.6</li>
-        <li><span class="who r"><em>R3 대구</em>김정국</span><span class="val">70.2</span></li>
+        <li><span class="who r"><em>R3 대구</em>김정국</span><span class="val">70.2</span><span class="pz">상품권 20만원</span></li>
       </ul>
-      <p>R1은 김정국과 72.4 동점, 집계표 순위 기준 · 중복 수상 시 차순위가 수상하고 실제 1위는 명예 1위로 표기</p>
+      <p>챔피언과 중복 수상 시 차순위가 수상하고 실제 1위는 명예 1위로 표기 · R1은 장성집·김정국 72.4 동점</p>
     </div>
     <div class="win">
       <h4>니어리스트</h4>
       <ul>
-        <li><span class="who b"><em>R1</em>이준헌</span><span class="val">2m</span></li>
-        <li><span class="who b"><em>R2</em>양성민</span><span class="val">4m</span></li>
+        <li><span class="who b"><em>R1</em>이준헌</span><span class="val">2m</span><span class="pz">웨지 52°</span></li>
+        <li><span class="who b"><em>R2</em>양성민</span><span class="val">4m</span><span class="pz">웨지 56°</span></li>
         <li class="hon">🏅 명예 1위 <b class="r">김정국</b> 0.3m</li>
-        <li><span class="who b"><em>R3</em>조주영</span><span class="val">5m</span></li>
+        <li><span class="who b"><em>R3</em>조주영</span><span class="val">5m</span><span class="pz">상품권</span></li>
         <li class="hon">🏅 명예 1위 <b class="b">이준헌</b> 3m</li>
       </ul>
     </div>
     <div class="win">
       <h4>롱기스트</h4>
       <ul>
-        <li><span class="who b"><em>R1</em>김동유</span><span class="val">260m</span></li>
-        <li><span class="who b"><em>R2</em>김성래</span><span class="val">280m</span></li>
-        <li><span class="who r"><em>R3</em>김정탁</span><span class="val">250m</span></li>
+        <li><span class="who b"><em>R1</em>김동유</span><span class="val">260m</span><span class="pz">골프공 1더즌</span></li>
+        <li><span class="who b"><em>R2</em>김성래</span><span class="val">280m</span><span class="pz">골프공 1더즌</span></li>
+        <li><span class="who r"><em>R3</em>김정탁</span><span class="val">250m</span><span class="pz">골프공 1더즌</span></li>
         <li class="hon">🏅 명예 1위 <b class="b">김동유</b> 260m</li>
       </ul>
     </div>
     <div class="win">
       <h4>다버디상</h4>
-      <ul><li><span class="who b">김성래</span><span class="val">버디 9</span></li></ul>
+      <ul><li><span class="who b">김성래</span><span class="val">버디 9</span><span class="pz">고급 안마기 · 명예 MVP 예우</span></li></ul>
       <p>R1 2 · R2 4 · R3 3</p>
     </div>
     <div class="win">
       <h4>유종의 미상 · 마지막 날 베스트</h4>
-      <ul><li><span class="who r">신용훈</span><span class="val">80</span></li></ul>
+      <ul><li><span class="who r">신용훈</span><span class="val">80</span><span class="pz">술 1병</span></li></ul>
       <p>R3 대구 전체 2위 · 개인 3일 중 최고 (R2 91 → 80)</p>
     </div>
     <div class="win">
       <h4>파 행진상 · 최다 연속 파</h4>
-      <ul><li><span class="who r">권태영</span><span class="val">6연속</span></li></ul>
+      <ul><li><span class="who r">권태영</span><span class="val">6연속</span><span class="pz">술 1병</span></li></ul>
       <p>R1 포도 후반 4~9번 · 김동영·이준헌도 6연속 공동 1위</p>
     </div>
     <div class="win">
       <h4>파3상 · 3일 파3 최소타</h4>
-      <ul><li><span class="who r">김동영</span><span class="val">+3</span></li></ul>
+      <ul><li><span class="who r">김동영</span><span class="val">+3</span><span class="pz">상품권</span></li></ul>
       <p>파3 12홀 · 버디 1 · 파 7</p>
     </div>
     <div class="win">
       <h4>파5상 · 3일 파5 최소타</h4>
-      <ul><li><span class="who r">김정탁</span><span class="val">+1</span></li></ul>
+      <ul><li><span class="who r">김정탁</span><span class="val">+1</span><span class="pz">상품권</span></li></ul>
       <p>파5 11홀 · 버디 3</p>
     </div>
     <div class="win">
       <h4>이글상</h4>
-      <ul><li><span class="who r">장성집</span><span class="val">-2</span></li></ul>
+      <ul><li><span class="who r">장성집</span><span class="val">-2</span><span class="pz">술 1병</span></li></ul>
       <p>R2 해내다 스카이 1번 (파4) · 대회 유일 이글</p>
     </div>
     <div class="win">
       <h4>내년엔 잘하자상</h4>
-      <ul><li><span class="who r">홍상현</span><span class="val">293</span></li></ul>
+      <ul><li><span class="who r">홍상현</span><span class="val">293</span><span class="pz">골프공 3더즌 · 공 많이 챙기세요</span></li></ul>
       <p>92 · 100 · 101</p>
     </div>
     <div class="win wide">
       <h4>특별상</h4>
       <ul>
-        <li><span class="who b"><em>족구 MVP</em>이준헌</span><span class="val">현장 투표</span></li>
-        <li><span class="who b"><em>분위기 메이커상</em>임재용</span><span class="val">단장 선정</span></li>
-        <li><span class="who"><em>개근상</em><span class="r">김동영 · 김정국</span></span><span class="val">1년 개근</span></li>
-        <li><span class="who b"><em>부상투혼상</em>김대호</span><span class="val">끝까지 완주</span></li>
-        <li><span class="who r"><em>알콜러상</em>장노륜</span><span class="val">3일 개근 음주</span></li>
+        <li><span class="who b"><em>족구 MVP</em>이준헌</span><span class="val">현장 투표</span><span class="pz">골프공 1더즌</span></li>
+        <li><span class="who b"><em>분위기 메이커상</em>임재용</span><span class="val">단장 선정</span><span class="pz">여행용 충전기</span></li>
+        <li><span class="who"><em>개근상</em><span class="r">김동영 · 김정국</span></span><span class="val">1년 개근</span><span class="pz">골프공 1더즌씩</span></li>
+        <li><span class="who b"><em>부상투혼상</em>김대호</span><span class="val">끝까지 완주</span><span class="pz">상품권</span></li>
+        <li><span class="who r"><em>알콜러상</em>장노륜</span><span class="val">3일 개근 음주</span><span class="pz">술 1병</span></li>
       </ul>
     </div>
   </div>
@@ -320,8 +326,8 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <table>
       <thead><tr><th>#</th><th>이름</th><th>R1</th><th>R2</th><th>R3</th><th>합계</th><th>버디</th></tr></thead>
       <tbody>
-        <tr class="top"><td>1</td><td class="n b">김성래</td><td class="m best">79</td><td class="m">81</td><td class="m best">77</td><td class="t">237</td><td class="m">9</td></tr>
-        <tr><td>2</td><td class="n r">장성집</td><td class="m">82</td><td class="m best">73</td><td class="m">84</td><td class="t">239</td><td class="m">7</td></tr>
+        <tr><td>1</td><td class="n b">김성래 <span class="ret-tag">명예</span></td><td class="m best">79</td><td class="m">81</td><td class="m best">77</td><td class="t">237</td><td class="m">9</td></tr>
+        <tr class="top"><td>2</td><td class="n r">장성집 <span class="ret-tag">챔피언</span></td><td class="m">82</td><td class="m best">73</td><td class="m">84</td><td class="t">239</td><td class="m">7</td></tr>
         <tr><td>3</td><td class="n r">김정국</td><td class="m">82</td><td class="m">81</td><td class="m">81</td><td class="t">244</td><td class="m">5</td></tr>
         <tr><td>4</td><td class="n r">김동영</td><td class="m">81</td><td class="m">81</td><td class="m">85</td><td class="t">247</td><td class="m">2</td></tr>
         <tr><td>5</td><td class="n b">김동유</td><td class="m best">79</td><td class="m">83</td><td class="m">86</td><td class="t">248</td><td class="m">2</td></tr>
@@ -569,15 +575,15 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <table>
       <thead><tr><th>협찬자</th><th>품목</th><th>사용처</th></tr></thead>
       <tbody>
-        <tr><td>타이슨</td><td>술 1</td><td>라운드 메달리스트</td></tr>
-        <tr><td>김정탁</td><td>술 1</td><td>라운드 메달리스트</td></tr>
-        <tr><td>김동유</td><td>고급 안마기 1 · 술 1</td><td>개인 MVP · 라운드 메달리스트</td></tr>
-        <tr><td>김동영</td><td>술 1</td><td>파 행진상</td></tr>
-        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="4">우승팀 8 · 니어 1 · 다버디 1 · 족구 MVP 1 · 파3 1 · 파5 1 · 개근 2 · 유종의 미 1 · 이글 1</td></tr>
+        <tr><td>타이슨</td><td>술 1</td><td rowspan="4">술: 유종의 미 · 파 행진 · 이글 · 알콜러<br>안마기: 다버디 (명예 MVP)</td></tr>
+        <tr><td>김정탁</td><td>술 1</td></tr>
+        <tr><td>김동유</td><td>고급 안마기 1 · 술 1</td></tr>
+        <tr><td>김동영</td><td>술 1</td></tr>
+        <tr><td>곽영주</td><td>상품권 4</td><td rowspan="4">챔피언 30만원 · 라운드 메달리스트 20만원×3 · 니어 R3 · 파3 · 파5 · 부상투혼</td></tr>
         <tr><td>임재용</td><td>상품권 4</td></tr>
         <tr><td>조주영</td><td>상품권 4</td></tr>
         <tr><td>김대호</td><td>상품권 5</td></tr>
-        <tr><td>김정국</td><td>골프공 5더즌</td><td rowspan="4">준우승팀 8 · 롱기스트 3 · 최다타 1</td></tr>
+        <tr><td>김정국</td><td>골프공 5더즌</td><td rowspan="4">공: 롱기스트 3 · 내년엔 잘하자 3 · 족구 MVP 1 · 개근 2 · 잔여 3<br>충전기: 분위기 메이커</td></tr>
         <tr><td>신용훈</td><td>골프공 3더즌</td></tr>
         <tr><td>김성래</td><td>골프공 2더즌 · 여행용 충전기 1</td></tr>
         <tr><td>이준헌</td><td>골프공 2더즌</td></tr>
